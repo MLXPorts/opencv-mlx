@@ -1,6 +1,6 @@
 from __future__ import print_function
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 import random as rng
 
@@ -29,7 +29,7 @@ def thresh_callback(val):
 
     # Draw contours + rotated rects + ellipses
     ## [zeroMat]
-    drawing = np.zeros((canny_output.shape[0], canny_output.shape[1], 3), dtype=np.uint8)
+    drawing = mx.zeros((canny_output.shape[0], canny_output.shape[1], 3), dtype=mx.uint8)
     ## [zeroMat]
     ## [forContour]
     for i, c in enumerate(contours):
@@ -41,7 +41,7 @@ def thresh_callback(val):
             cv.ellipse(drawing, minEllipse[i], color, 2)
         # rotated rectangle
         box = cv.boxPoints(minRect[i])
-        box = np.intp(box) #np.intp: Integer used for indexing (same as C ssize_t; normally either int32 or int64)
+        box = mx.intp(box) #mx.intp: Integer used for indexing (same as C ssize_t; normally either int32 or int64)
         cv.drawContours(drawing, [box], 0, color)
     ## [forContour]
 

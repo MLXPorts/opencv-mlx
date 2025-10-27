@@ -11,7 +11,7 @@ Usage:
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 # built-in modules
@@ -78,16 +78,16 @@ def main():
 
             s = 1.5*float(h)/SZ
             m = cv.moments(bin_roi)
-            c1 = np.float32([m['m10'], m['m01']]) / m['m00']
-            c0 = np.float32([SZ/2, SZ/2])
+            c1 = mx.float32([m['m10'], m['m01']]) / m['m00']
+            c0 = mx.float32([SZ/2, SZ/2])
             t = c1 - s*c0
-            A = np.zeros((2, 3), np.float32)
-            A[:,:2] = np.eye(2)*s
+            A = mx.zeros((2, 3), mx.float32)
+            A[:,:2] = mx.eye(2)*s
             A[:,2] = t
             bin_norm = cv.warpAffine(bin_roi, A, (SZ, SZ), flags=cv.WARP_INVERSE_MAP | cv.INTER_LINEAR)
             bin_norm = deskew(bin_norm)
             if x+w+SZ < frame.shape[1] and y+SZ < frame.shape[0]:
-                frame[y:,x+w:][:SZ, :SZ] = bin_norm[...,np.newaxis]
+                frame[y:,x+w:][:SZ, :SZ] = bin_norm[...,mx.newaxis]
 
             sample = preprocess_hog([bin_norm])
             digit = model.predict(sample)[1].ravel()

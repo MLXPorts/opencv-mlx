@@ -25,7 +25,7 @@ Select a textured planar object to track by drawing a box with a mouse.
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 # local modules
@@ -60,7 +60,7 @@ class App:
                 self.frame = frame.copy()
 
             w, h = getsize(self.frame)
-            vis = np.zeros((h, w*2, 3), np.uint8)
+            vis = mx.zeros((h, w*2, 3), mx.uint8)
             vis[:h,:w] = self.frame
             if len(self.tracker.targets) > 0:
                 target = self.tracker.targets[0]
@@ -73,8 +73,8 @@ class App:
                 tracked = self.tracker.track(self.frame)
                 if len(tracked) > 0:
                     tracked = tracked[0]
-                    cv.polylines(vis, [np.int32(tracked.quad)], True, (255, 255, 255), 2)
-                    for (x0, y0), (x1, y1) in zip(np.int32(tracked.p0), np.int32(tracked.p1)):
+                    cv.polylines(vis, [mx.int32(tracked.quad)], True, (255, 255, 255), 2)
+                    for (x0, y0), (x1, y1) in zip(mx.int32(tracked.p0), mx.int32(tracked.p1)):
                         cv.line(vis, (x0+w, y0), (x1, y1), (0, 255, 0))
             draw_keypoints(vis, self.tracker.frame_points)
 

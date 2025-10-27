@@ -1,4 +1,4 @@
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import argparse
 
@@ -22,7 +22,7 @@ lk_params = dict( winSize  = (15, 15),
                   criteria = (cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 10, 0.03))
 
 # Create some random colors
-color = np.random.randint(0, 255, (100, 3))
+color = mx.random.randint(0, 255, (100, 3))
 
 # Take first frame and find corners in it
 ret, old_frame = cap.read()
@@ -30,7 +30,7 @@ old_gray = cv.cvtColor(old_frame, cv.COLOR_BGR2GRAY)
 p0 = cv.goodFeaturesToTrack(old_gray, mask = None, **feature_params)
 
 # Create a mask image for drawing purposes
-mask = np.zeros_like(old_frame)
+mask = mx.zeros_like(old_frame)
 
 while(1):
     ret, frame = cap.read()

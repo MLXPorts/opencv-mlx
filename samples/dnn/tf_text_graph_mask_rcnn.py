@@ -1,5 +1,5 @@
 import argparse
-import numpy as np
+import mlx.core as mx
 from tf_text_graph_common import *
 
 parser = argparse.ArgumentParser(description='Run this script to get a text graph of '
@@ -126,7 +126,7 @@ widths = []
 heights = []
 for a in aspect_ratios:
     for s in scales:
-        ar = np.sqrt(a)
+        ar = mx.sqrt(a)
         heights.append((height_stride**2) * s / ar)
         widths.append((width_stride**2) * s * ar)
 

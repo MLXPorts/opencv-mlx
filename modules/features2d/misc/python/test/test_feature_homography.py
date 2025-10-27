@@ -12,7 +12,7 @@ PlaneTracker class in plane_tracker.py
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import sys
 PY3 = sys.version_info[0] == 3
@@ -26,10 +26,10 @@ from tst_scene_render import TestSceneRender
 def intersectionRate(s1, s2):
 
     x1, y1, x2, y2 = s1
-    s1 = np.array([[x1, y1], [x2,y1], [x2, y2], [x1, y2]])
+    s1 = mx.array([[x1, y1], [x2,y1], [x2, y2], [x1, y2]])
 
-    area, _intersection = cv.intersectConvexConvex(s1, np.array(s2))
-    return 2 * area / (cv.contourArea(s1) + cv.contourArea(np.array(s2)))
+    area, _intersection = cv.intersectConvexConvex(s1, mx.array(s2))
+    return 2 * area / (cv.contourArea(s1) + cv.contourArea(mx.array(s2)))
 
 from tests_common import NewOpenCVTests
 
@@ -54,7 +54,7 @@ class feature_homography_test(NewOpenCVTests):
             tracked = self.tracker.track(self.frame)
             if len(tracked) > 0:
                 tracked = tracked[0]
-                self.assertGreater(intersectionRate(self.render.getCurrentRect(), np.int32(tracked.quad)), 0.6)
+                self.assertGreater(intersectionRate(self.render.getCurrentRect(), mx.int32(tracked.quad)), 0.6)
             else:
                 self.assertEqual(0, 1, 'Tracking error')
             self.frame = self.render.getNextFrame()
@@ -107,7 +107,7 @@ class PlaneTracker:
             if x0 <= x <= x1 and y0 <= y <= y1:
                 points.append(kp)
                 descs.append(desc)
-        descs = np.uint8(descs)
+        descs = mx.uint8(descs)
         self.matcher.add([descs])
         target = PlanarTarget(image = image, rect=rect, keypoints = points, descrs=descs, data=data)
         self.targets.append(target)
@@ -136,7 +136,7 @@ class PlaneTracker:
             target = self.targets[imgIdx]
             p0 = [target.keypoints[m.trainIdx].pt for m in matches]
             p1 = [self.frame_points[m.queryIdx].pt for m in matches]
-            p0, p1 = np.float32((p0, p1))
+            p0, p1 = mx.float32((p0, p1))
             H, status = cv.findHomography(p0, p1, cv.RANSAC, 3.0)
             status = status.ravel() != 0
             if status.sum() < MIN_MATCH_COUNT:
@@ -144,7 +144,7 @@ class PlaneTracker:
             p0, p1 = p0[status], p1[status]
 
             x0, y0, x1, y1 = target.rect
-            quad = np.float32([[x0, y0], [x1, y0], [x1, y1], [x0, y1]])
+            quad = mx.float32([[x0, y0], [x1, y0], [x1, y1], [x0, y1]])
             quad = cv.perspectiveTransform(quad.reshape(1, -1, 2), H).reshape(-1, 2)
 
             track = TrackedTarget(target=target, p0=p0, p1=p1, H=H, quad=quad)

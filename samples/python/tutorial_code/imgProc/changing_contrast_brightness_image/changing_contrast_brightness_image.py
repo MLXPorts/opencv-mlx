@@ -1,7 +1,7 @@
 from __future__ import print_function
 from __future__ import division
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 
 alpha = 1.0
@@ -18,9 +18,9 @@ def basicLinearTransform():
 
 def gammaCorrection():
     ## [changing-contrast-brightness-gamma-correction]
-    lookUpTable = np.empty((1,256), np.uint8)
+    lookUpTable = mx.empty((1,256), mx.uint8)
     for i in range(256):
-        lookUpTable[0,i] = np.clip(pow(i / 255.0, gamma) * 255.0, 0, 255)
+        lookUpTable[0,i] = mx.clip(pow(i / 255.0, gamma) * 255.0, 0, 255)
 
     res = cv.LUT(img_original, lookUpTable)
     ## [changing-contrast-brightness-gamma-correction]
@@ -52,8 +52,8 @@ if img_original is None:
     print('Could not open or find the image: ', args.input)
     exit(0)
 
-img_corrected = np.empty((img_original.shape[0], img_original.shape[1]*2, img_original.shape[2]), img_original.dtype)
-img_gamma_corrected = np.empty((img_original.shape[0], img_original.shape[1]*2, img_original.shape[2]), img_original.dtype)
+img_corrected = mx.empty((img_original.shape[0], img_original.shape[1]*2, img_original.shape[2]), img_original.dtype)
+img_gamma_corrected = mx.empty((img_original.shape[0], img_original.shape[1]*2, img_original.shape[2]), img_original.dtype)
 
 img_corrected = cv.hconcat([img_original, img_original])
 img_gamma_corrected = cv.hconcat([img_original, img_original])

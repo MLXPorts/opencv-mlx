@@ -1,4 +1,4 @@
-import numpy as np
+import mlx.core as mx
 import sys
 import os
 import fnmatch
@@ -25,8 +25,8 @@ class NormalizePreproc:
 
     @staticmethod
     def process(img):
-        image_data = np.array(img).transpose(2, 0, 1).astype(np.float32)
-        image_data = np.expand_dims(image_data, 0)
+        image_data = mx.array(img).transpose(2, 0, 1).astype(mx.float32)
+        image_data = mx.expand_dims(image_data, 0)
         image_data /= 255.0
         return image_data
 

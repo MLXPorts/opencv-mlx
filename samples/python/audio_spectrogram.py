@@ -1,4 +1,4 @@
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import math
 import argparse
@@ -54,8 +54,8 @@ class AudioDrawing:
             remainder = len(inputAudio) % samplingRate
             if remainder != 0:
                 sizeToFullSec = samplingRate - remainder
-                zeroArr = np.zeros(sizeToFullSec)
-                inputAudio = np.concatenate((inputAudio, zeroArr), axis=0)
+                zeroArr = mx.zeros(sizeToFullSec)
+                inputAudio = mx.concatenate((inputAudio, zeroArr), axis=0)
                 duration += 1
                 print("Update duration of audio to full second with ",
                     sizeToFullSec, " zero samples")
@@ -104,7 +104,7 @@ class AudioDrawing:
         params = [cv.CAP_PROP_AUDIO_STREAM, self.audioStream,
                 cv.CAP_PROP_VIDEO_STREAM, -1,
                 cv.CAP_PROP_AUDIO_DATA_DEPTH, cv.CV_16S]
-        params = np.asarray(params)
+        params = mx.asarray(params)
 
         cap.open(file, cv.CAP_ANY, params)
         if cap.isOpened() == False:
@@ -120,20 +120,20 @@ class AudioDrawing:
         print("CAP_PROP_AUDIO_TOTAL_STREAMS: ", cap.get(cv.CAP_PROP_AUDIO_TOTAL_STREAMS))
 
         frame = []
-        frame = np.asarray(frame)
+        frame = mx.asarray(frame)
         inputAudio = []
 
         while (1):
             if (cap.grab()):
                 frame = []
-                frame = np.asarray(frame)
+                frame = mx.asarray(frame)
                 frame = cap.retrieve(frame, audioBaseIndex)
                 for i in range(len(frame[1][0])):
                     inputAudio.append(frame[1][0][i])
             else:
                 break
 
-        inputAudio = np.asarray(inputAudio)
+        inputAudio = mx.asarray(inputAudio)
         print("Number of samples: ", len(inputAudio))
         samplingRate = int(cap.get(cv.CAP_PROP_AUDIO_SAMPLES_PER_SECOND))
         return samplingRate, inputAudio
@@ -143,7 +143,7 @@ class AudioDrawing:
         cap = cv.VideoCapture()
 
         params = [cv.CAP_PROP_AUDIO_STREAM, 0, cv.CAP_PROP_VIDEO_STREAM, -1]
-        params = np.asarray(params)
+        params = mx.asarray(params)
 
         cap.open(0, cv.CAP_ANY, params)
         if cap.isOpened() == False:
@@ -163,13 +163,13 @@ class AudioDrawing:
         sysTimePrev = sysTimeCurr
 
         frame = []
-        frame = np.asarray(frame)
+        frame = mx.asarray(frame)
         inputAudio = []
 
         while ((sysTimeCurr - sysTimePrev) / cvTickFreq < self.microTime):
             if (cap.grab()):
                 frame = []
-                frame = np.asarray(frame)
+                frame = mx.asarray(frame)
                 frame = cap.retrieve(frame, audioBaseIndex)
                 for i in range(len(frame[1][0])):
                     inputAudio.append(frame[1][0][i])
@@ -178,7 +178,7 @@ class AudioDrawing:
                 print("Error: Grab error")
                 break
 
-        inputAudio = np.asarray(inputAudio)
+        inputAudio = mx.asarray(inputAudio)
         print("Number of samples: ", len(inputAudio))
         samplingRate = int(cap.get(cv.CAP_PROP_AUDIO_SAMPLES_PER_SECOND))
 
@@ -197,12 +197,12 @@ class AudioDrawing:
         if len(inputAudio) < frameVectorCols:
             frameVectorCols = len(inputAudio)
 
-        img = np.zeros((frameVectorRows, frameVectorCols, 3), np.uint8)
+        img = mx.zeros((frameVectorRows, frameVectorCols, 3), mx.uint8)
         img += 255  # white background
 
-        audio = np.array(0)
+        audio = mx.array(0)
         audio = cv.resize(inputAudio, (1, frameVectorCols), interpolation=cv.INTER_LINEAR)
-        reshapeAudio = np.reshape(audio, (-1))
+        reshapeAudio = mx.reshape(audio, (-1))
 
         # normalization data by maximum element
         minCv, maxCv, _, _ = cv.minMaxLoc(reshapeAudio)
@@ -238,7 +238,7 @@ class AudioDrawing:
         totalRows = preLine + frameVectorRows + aftLine
         totalCols = preCol + frameVectorCols + aftCol
 
-        imgTotal = np.zeros((totalRows, totalCols, 3), np.uint8)
+        imgTotal = mx.zeros((totalRows, totalCols, 3), mx.uint8)
         imgTotal += 255  # white background
         imgTotal[preLine: preLine + frameVectorRows, preCol: preCol + frameVectorCols] = inputImg
 
@@ -249,16 +249,16 @@ class AudioDrawing:
             xmax = len(inputAudio) / samplingRate
 
         if xmax > self.xmarkup:
-            xList = np.linspace(xmin, xmax, self.xmarkup).astype(int)
+            xList = mx.linspace(xmin, xmax, self.xmarkup).astype(int)
         else:
             # this case is used to display a dynamic update
-            tmp = np.arange(xmin, xmax, 1).astype(int) + 1
-            xList = np.concatenate((np.zeros(self.xmarkup - len(tmp)), tmp[:]), axis=None)
+            tmp = mx.arange(xmin, xmax, 1).astype(int) + 1
+            xList = mx.concatenate((mx.zeros(self.xmarkup - len(tmp)), tmp[:]), axis=None)
 
         # calculating values on y axis
-        ymin = np.min(inputAudio)
-        ymax = np.max(inputAudio)
-        yList = np.linspace(ymin, ymax, self.ymarkup)
+        ymin = mx.min(inputAudio)
+        ymax = mx.max(inputAudio)
+        yList = mx.linspace(ymin, ymax, self.ymarkup)
 
         # parameters for layout drawing
         textThickness = 1
@@ -337,38 +337,38 @@ class AudioDrawing:
             Hann_wind = []
             for i in range (1 - self.windLen, self.windLen, 2):
                 Hann_wind.append(i * (0.5 + 0.5 * math.cos(math.pi * i / (self.windLen - 1))))
-            Hann_wind = np.asarray(Hann_wind)
+            Hann_wind = mx.asarray(Hann_wind)
 
         elif self.windowType == "Hamming":
             # https://en.wikipedia.org/wiki/Window_function#Hann_and_Hamming_windows
             Hamming_wind = []
             for i in range (1 - self.windLen, self.windLen, 2):
                 Hamming_wind.append(i * (0.53836 - 0.46164 * (math.cos(2 * math.pi * i / (self.windLen - 1)))))
-            Hamming_wind = np.asarray(Hamming_wind)
+            Hamming_wind = mx.asarray(Hamming_wind)
 
-        for index in np.arange(0, len(inputAudio), time_step).astype(int):
+        for index in mx.arange(0, len(inputAudio), time_step).astype(int):
 
             section = inputAudio[index:index + self.windLen]
-            zeroArray = np.zeros(self.windLen - len(section))
-            section = np.concatenate((section, zeroArray), axis=None)
+            zeroArray = mx.zeros(self.windLen - len(section))
+            section = mx.concatenate((section, zeroArray), axis=None)
 
             if self.windowType == "Hann":
                 section *= Hann_wind
             elif self.windowType == "Hamming":
                 section *= Hamming_wind
 
-            dst = np.empty(0)
+            dst = mx.empty(0)
             dst = cv.dft(section, dst, flags=cv.DFT_COMPLEX_OUTPUT)
-            reshape_dst = np.reshape(dst, (-1))
+            reshape_dst = mx.reshape(dst, (-1))
             # we need only the first part of the spectrum, the second part is symmetrical
-            complexArr = np.zeros(len(dst) // 4, dtype=complex)
+            complexArr = mx.zeros(len(dst) // 4, dtype=complex)
             for i in range(len(dst) // 4):
                 complexArr[i] = complex(reshape_dst[2 * i], reshape_dst[2 * i + 1])
-            stft.append(np.abs(complexArr))
+            stft.append(mx.abs(complexArr))
 
-        stft = np.array(stft).transpose()
+        stft = mx.array(stft).transpose()
         # convert elements to the decibel scale
-        np.log10(stft, out=stft, where=(stft != 0.))
+        mx.log10(stft, out=stft, where=(stft != 0.))
         return 10 * stft
 
 
@@ -381,8 +381,8 @@ class AudioDrawing:
         # and this normalization will be taken into account in the scale drawing
         colormapImageRows = 255
 
-        imgSpec = np.zeros((frameVectorRows, frameVectorCols, 3), np.uint8)
-        stftMat = np.zeros((frameVectorRows, frameVectorCols), np.float64)
+        imgSpec = mx.zeros((frameVectorRows, frameVectorCols, 3), mx.uint8)
+        stftMat = mx.zeros((frameVectorRows, frameVectorCols), mx.float64)
         cv.normalize(stft, stftMat, 1.0, 0.0, cv.NORM_INF)
 
         for i in range(frameVectorRows):
@@ -414,14 +414,14 @@ class AudioDrawing:
         totalRows = preLine + frameVectorRows + aftLine
         totalCols = preCol + frameVectorCols + aftCol + colColor
 
-        imgTotal = np.zeros((totalRows, totalCols, 3), np.uint8)
+        imgTotal = mx.zeros((totalRows, totalCols, 3), mx.uint8)
         imgTotal += 255  # white background
         imgTotal[preLine: preLine + frameVectorRows, preCol: preCol + frameVectorCols] = inputImg
 
         # colorbar image due to drawSpectrogram(..) picture has been normalised from 255 to 0,
         # so here colorbar has values from 255 to 0
         colorArrSize = 256
-        imgColorBar = np.zeros((colorArrSize, colColor, 1), np.uint8)
+        imgColorBar = mx.zeros((colorArrSize, colColor, 1), mx.uint8)
 
         for i in range(colorArrSize):
             imgColorBar[i] += colorArrSize - 1 - i
@@ -439,21 +439,21 @@ class AudioDrawing:
         if xmax is None:
             xmax = len(inputAudio) / samplingRate
         if xmax > self.xmarkup:
-            xList = np.linspace(xmin, xmax, self.xmarkup).astype(int)
+            xList = mx.linspace(xmin, xmax, self.xmarkup).astype(int)
         else:
             # this case is used to display a dynamic update
-            tmpXList = np.arange(xmin, xmax, 1).astype(int) + 1
-            xList = np.concatenate((np.zeros(self.xmarkup - len(tmpXList)), tmpXList[:]), axis=None)
+            tmpXList = mx.arange(xmin, xmax, 1).astype(int) + 1
+            xList = mx.concatenate((mx.zeros(self.xmarkup - len(tmpXList)), tmpXList[:]), axis=None)
 
         # calculating values on y axis
         # according to the Nyquist sampling theorem,
         # signal should posses frequencies equal to half of sampling rate
         ymin = 0
         ymax = int(samplingRate / 2.)
-        yList = np.linspace(ymin, ymax, self.ymarkup).astype(int)
+        yList = mx.linspace(ymin, ymax, self.ymarkup).astype(int)
 
         # calculating values on z axis
-        zList = np.linspace(np.min(stft), np.max(stft), self.zmarkup)
+        zList = mx.linspace(mx.min(stft), mx.max(stft), self.zmarkup)
 
         # parameters for layout drawing
         textThickness = 1
@@ -518,7 +518,7 @@ class AudioDrawing:
         totalCols = max(img1.shape[1], img2.shape[1])
 
         # if images columns do not match, the difference is filled in white
-        imgTotal = np.zeros((totalRows, totalCols, 3), np.uint8)
+        imgTotal = mx.zeros((totalRows, totalCols, 3), mx.uint8)
         imgTotal += 255
 
         imgTotal[:img1.shape[0], :img1.shape[1]] = img1
@@ -532,7 +532,7 @@ class AudioDrawing:
         params = [cv.CAP_PROP_AUDIO_STREAM, self.audioStream,
                 cv.CAP_PROP_VIDEO_STREAM, -1,
                 cv.CAP_PROP_AUDIO_DATA_DEPTH, cv.CV_16S]
-        params = np.asarray(params)
+        params = mx.asarray(params)
 
         cap.open(file, cv.CAP_ANY, params)
         if cap.isOpened() == False:
@@ -557,13 +557,13 @@ class AudioDrawing:
             self.xmarkup = self.frameSizeTime
 
         buffer = []
-        section = np.zeros(frameSize, dtype=np.int16)
+        section = mx.zeros(frameSize, dtype=mx.int16)
         currentSamples = 0
 
         while (1):
             if (cap.grab()):
                 frame = []
-                frame = np.asarray(frame)
+                frame = mx.asarray(frame)
                 frame = cap.retrieve(frame, audioBaseIndex)
 
                 for i in range(len(frame[1][0])):
@@ -579,7 +579,7 @@ class AudioDrawing:
                     section.extend(buffer[0:step])
                     del buffer[0:step]
 
-                    section = np.asarray(section)
+                    section = mx.asarray(section)
 
                     if currentSamples < frameSize:
                         xmin = 0
@@ -620,7 +620,7 @@ class AudioDrawing:
     def dynamicMicrophone(self):
         cap = cv.VideoCapture()
         params = [cv.CAP_PROP_AUDIO_STREAM, 0, cv.CAP_PROP_VIDEO_STREAM, -1]
-        params = np.asarray(params)
+        params = mx.asarray(params)
 
         cap.open(0, cv.CAP_ANY, params)
         if cap.isOpened() == False:
@@ -635,7 +635,7 @@ class AudioDrawing:
         print("CAP_PROP_AUDIO_TOTAL_STREAMS: ", cap.get(cv.CAP_PROP_AUDIO_TOTAL_STREAMS))
 
         frame = []
-        frame = np.asarray(frame)
+        frame = mx.asarray(frame)
         samplingRate = int(cap.get(cv.CAP_PROP_AUDIO_SAMPLES_PER_SECOND))
 
         step = int(self.updateTime * samplingRate)
@@ -645,7 +645,7 @@ class AudioDrawing:
         currentSamples = 0
 
         buffer = []
-        section = np.zeros(frameSize, dtype=np.int16)
+        section = mx.zeros(frameSize, dtype=mx.int16)
 
         cvTickFreq = cv.getTickFrequency()
         sysTimeCurr = cv.getTickCount()
@@ -654,7 +654,7 @@ class AudioDrawing:
         while ((sysTimeCurr - sysTimePrev) / cvTickFreq < self.microTime):
             if (cap.grab()):
                 frame = []
-                frame = np.asarray(frame)
+                frame = mx.asarray(frame)
                 frame = cap.retrieve(frame, audioBaseIndex)
 
                 for i in range(len(frame[1][0])):
@@ -671,7 +671,7 @@ class AudioDrawing:
                     section.extend(buffer[0:step])
                     del buffer[0:step]
 
-                    section = np.asarray(section)
+                    section = mx.asarray(section)
 
                     if currentSamples < frameSize:
                         xmin = 0

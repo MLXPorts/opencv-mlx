@@ -1,6 +1,6 @@
 import os
 import paddlehub.vision.transforms as T
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 
@@ -37,22 +37,22 @@ def visualize(image, result, save_dir=None, weight=0.6):
 
     Args:
         image (str): The path of origin image.
-        result (np.ndarray): The predict result of image.
+        result (mx.ndarray): The predict result of image.
         save_dir (str): The directory for saving visual image. Default: None.
         weight (float): The image weight of visual image, and the result weight is (1 - weight). Default: 0.6
 
     Returns:
-        vis_result (np.ndarray): If `save_dir` is None, return the visualized result.
+        vis_result (mx.ndarray): If `save_dir` is None, return the visualized result.
     """
 
     color_map = get_color_map_list(256)
     color_map = [color_map[i:i + 3] for i in range(0, len(color_map), 3)]
-    color_map = np.array(color_map).astype("uint8")
+    color_map = mx.array(color_map).astype("uint8")
     # Use OpenCV LUT for color mapping
     c1 = cv.LUT(result, color_map[:, 0])
     c2 = cv.LUT(result, color_map[:, 1])
     c3 = cv.LUT(result, color_map[:, 2])
-    pseudo_img = np.dstack((c1, c2, c3))
+    pseudo_img = mx.dstack((c1, c2, c3))
 
     im = cv.imread(image)
     vis_result = cv.addWeighted(im, weight, pseudo_img, 1 - weight, 0)
@@ -68,7 +68,7 @@ def visualize(image, result, save_dir=None, weight=0.6):
 
 
 def preprocess(image_path):
-    ''' preprocess input image file to np.ndarray
+    ''' preprocess input image file to mx.ndarray
 
     Args:
         image_path(str): Path of input image file
@@ -82,7 +82,7 @@ def preprocess(image_path):
         T.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
     ],
         to_rgb=True)
-    return np.expand_dims(transforms(image_path), axis=0)
+    return mx.expand_dims(transforms(image_path), axis=0)
 
 
 if __name__ == '__main__':
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     # post process
     image = cv.imread(img_path)
     r, c, _ = image.shape
-    result = np.argmax(result[0], axis=1).astype(np.uint8)
+    result = mx.argmax(result[0], axis=1).astype(mx.uint8)
     result = cv.resize(result[0, :, :],
                        dsize=(c, r),
                        interpolation=cv.INTER_NEAREST)

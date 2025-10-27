@@ -17,7 +17,7 @@ USAGE
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 from common import anorm, getsize
@@ -66,31 +66,31 @@ def filter_matches(kp1, kp2, matches, ratio = 0.75):
             m = m[0]
             mkp1.append( kp1[m.queryIdx] )
             mkp2.append( kp2[m.trainIdx] )
-    p1 = np.float32([kp.pt for kp in mkp1])
-    p2 = np.float32([kp.pt for kp in mkp2])
+    p1 = mx.float32([kp.pt for kp in mkp1])
+    p2 = mx.float32([kp.pt for kp in mkp2])
     kp_pairs = zip(mkp1, mkp2)
     return p1, p2, list(kp_pairs)
 
 def explore_match(win, img1, img2, kp_pairs, status = None, H = None):
     h1, w1 = img1.shape[:2]
     h2, w2 = img2.shape[:2]
-    vis = np.zeros((max(h1, h2), w1+w2), np.uint8)
+    vis = mx.zeros((max(h1, h2), w1+w2), mx.uint8)
     vis[:h1, :w1] = img1
     vis[:h2, w1:w1+w2] = img2
     vis = cv.cvtColor(vis, cv.COLOR_GRAY2BGR)
 
     if H is not None:
-        corners = np.float32([[0, 0], [w1, 0], [w1, h1], [0, h1]])
-        corners = np.int32( cv.perspectiveTransform(corners.reshape(1, -1, 2), H).reshape(-1, 2) + (w1, 0) )
+        corners = mx.float32([[0, 0], [w1, 0], [w1, h1], [0, h1]])
+        corners = mx.int32( cv.perspectiveTransform(corners.reshape(1, -1, 2), H).reshape(-1, 2) + (w1, 0) )
         cv.polylines(vis, [corners], True, (255, 255, 255))
 
     if status is None:
-        status = np.ones(len(kp_pairs), np.bool_)
+        status = mx.ones(len(kp_pairs), mx.bool_)
         status = status.reshape((len(kp_pairs), 1))
     p1, p2 = [], []  # python 2 / python 3 change of zip unpacking
     for kpp in kp_pairs:
-        p1.append(np.int32(kpp[0].pt))
-        p2.append(np.int32(np.array(kpp[1].pt) + [w1, 0]))
+        p1.append(mx.int32(kpp[0].pt))
+        p2.append(mx.int32(mx.array(kpp[1].pt) + [w1, 0]))
 
     green = (0, 255, 0)
     red = (0, 0, 255)
@@ -120,8 +120,8 @@ def explore_match(win, img1, img2, kp_pairs, status = None, H = None):
         if flags & cv.EVENT_FLAG_LBUTTON:
             cur_vis = vis0.copy()
             r = 8
-            m = (anorm(np.array(p1) - (x, y)) < r) | (anorm(np.array(p2) - (x, y)) < r)
-            idxs = np.where(m)[0]
+            m = (anorm(mx.array(p1) - (x, y)) < r) | (anorm(mx.array(p2) - (x, y)) < r)
+            idxs = mx.where(m)[0]
 
             kp1s, kp2s = [], []
             for i in idxs:
@@ -178,7 +178,7 @@ def main():
         p1, p2, kp_pairs = filter_matches(kp1, kp2, raw_matches)
         if len(p1) >= 4:
             H, status = cv.findHomography(p1, p2, cv.RANSAC, 5.0)
-            print('%d / %d  inliers/matched' % (np.sum(status), len(status)))
+            print('%d / %d  inliers/matched' % (mx.sum(status), len(status)))
         else:
             H, status = None, None
             print('%d matches found, not enough for homography estimation' % len(p1))

@@ -2,7 +2,7 @@ from __future__ import print_function
 import sys
 import time
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 ## [basic_method]
@@ -26,7 +26,7 @@ def sharpen(my_image):
         my_image = cv.cvtColor(my_image, cv.CV_8U)
         height, width, n_channels = my_image.shape
 
-    result = np.zeros(my_image.shape, my_image.dtype)
+    result = mx.zeros(my_image.shape, my_image.dtype)
     ## [basic_method_loop]
     for j in range(1, height - 1):
         for i in range(1, width - 1):
@@ -77,9 +77,9 @@ def main(argv):
 
     t = time.time()
     ## [kern]
-    kernel = np.array([[0, -1, 0],
+    kernel = mx.array([[0, -1, 0],
                        [-1, 5, -1],
-                       [0, -1, 0]], np.float32)  # kernel should be floating point type
+                       [0, -1, 0]], mx.float32)  # kernel should be floating point type
     ## [kern]
     ## [filter2D]
     dst1 = cv.filter2D(src, -1, kernel)

@@ -17,7 +17,7 @@ default values:
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 from numpy import linspace
@@ -25,14 +25,14 @@ from numpy import linspace
 def inverse_homogeneoux_matrix(M):
     R = M[0:3, 0:3]
     T = M[0:3, 3]
-    M_inv = np.identity(4)
+    M_inv = mx.identity(4)
     M_inv[0:3, 0:3] = R.T
     M_inv[0:3, 3] = -(R.T).dot(T)
 
     return M_inv
 
 def transform_to_matplotlib_frame(cMo, X, inverse=False):
-    M = np.identity(4)
+    M = mx.identity(4)
     M[1,1] = 0
     M[1,2] = 1
     M[2,1] = -1
@@ -50,7 +50,7 @@ def create_camera_model(camera_matrix, width, height, scale_focal, draw_frame_ax
     f_scale = scale_focal * focal
 
     # draw image plane
-    X_img_plane = np.ones((4,5))
+    X_img_plane = mx.ones((4,5))
     X_img_plane[0:3,0] = [-width, height, f_scale]
     X_img_plane[0:3,1] = [width, height, f_scale]
     X_img_plane[0:3,2] = [width, -height, f_scale]
@@ -58,38 +58,38 @@ def create_camera_model(camera_matrix, width, height, scale_focal, draw_frame_ax
     X_img_plane[0:3,4] = [-width, height, f_scale]
 
     # draw triangle above the image plane
-    X_triangle = np.ones((4,3))
+    X_triangle = mx.ones((4,3))
     X_triangle[0:3,0] = [-width, -height, f_scale]
     X_triangle[0:3,1] = [0, -2*height, f_scale]
     X_triangle[0:3,2] = [width, -height, f_scale]
 
     # draw camera
-    X_center1 = np.ones((4,2))
+    X_center1 = mx.ones((4,2))
     X_center1[0:3,0] = [0, 0, 0]
     X_center1[0:3,1] = [-width, height, f_scale]
 
-    X_center2 = np.ones((4,2))
+    X_center2 = mx.ones((4,2))
     X_center2[0:3,0] = [0, 0, 0]
     X_center2[0:3,1] = [width, height, f_scale]
 
-    X_center3 = np.ones((4,2))
+    X_center3 = mx.ones((4,2))
     X_center3[0:3,0] = [0, 0, 0]
     X_center3[0:3,1] = [width, -height, f_scale]
 
-    X_center4 = np.ones((4,2))
+    X_center4 = mx.ones((4,2))
     X_center4[0:3,0] = [0, 0, 0]
     X_center4[0:3,1] = [-width, -height, f_scale]
 
     # draw camera frame axis
-    X_frame1 = np.ones((4,2))
+    X_frame1 = mx.ones((4,2))
     X_frame1[0:3,0] = [0, 0, 0]
     X_frame1[0:3,1] = [f_scale/2, 0, 0]
 
-    X_frame2 = np.ones((4,2))
+    X_frame2 = mx.ones((4,2))
     X_frame2[0:3,0] = [0, 0, 0]
     X_frame2[0:3,1] = [0, f_scale/2, 0]
 
-    X_frame3 = np.ones((4,2))
+    X_frame3 = mx.ones((4,2))
     X_frame3[0:3,0] = [0, 0, 0]
     X_frame3[0:3,1] = [0, 0, f_scale/2]
 
@@ -103,8 +103,8 @@ def create_board_model(extrinsics, board_width, board_height, square_size, draw_
     height = board_height*square_size
 
     # draw calibration board
-    X_board = np.ones((4,5))
-    #X_board_cam = np.ones((extrinsics.shape[0],4,5))
+    X_board = mx.ones((4,5))
+    #X_board_cam = mx.ones((extrinsics.shape[0],4,5))
     X_board[0:3,0] = [0,0,0]
     X_board[0:3,1] = [width,0,0]
     X_board[0:3,2] = [width,height,0]
@@ -112,15 +112,15 @@ def create_board_model(extrinsics, board_width, board_height, square_size, draw_
     X_board[0:3,4] = [0,0,0]
 
     # draw board frame axis
-    X_frame1 = np.ones((4,2))
+    X_frame1 = mx.ones((4,2))
     X_frame1[0:3,0] = [0, 0, 0]
     X_frame1[0:3,1] = [height/2, 0, 0]
 
-    X_frame2 = np.ones((4,2))
+    X_frame2 = mx.ones((4,2))
     X_frame2[0:3,0] = [0, 0, 0]
     X_frame2[0:3,1] = [0, height/2, 0]
 
-    X_frame3 = np.ones((4,2))
+    X_frame3 = mx.ones((4,2))
     X_frame3[0:3,0] = [0, 0, 0]
     X_frame3[0:3,1] = [0, 0, height/2]
 
@@ -134,10 +134,10 @@ def draw_camera_boards(ax, camera_matrix, cam_width, cam_height, scale_focal,
                        patternCentric):
     from matplotlib import cm
 
-    min_values = np.zeros((3,1))
-    min_values = np.inf
-    max_values = np.zeros((3,1))
-    max_values = -np.inf
+    min_values = mx.zeros((3,1))
+    min_values = mx.inf
+    max_values = mx.zeros((3,1))
+    max_values = -mx.inf
 
     if patternCentric:
         X_moving = create_camera_model(camera_matrix, cam_width, cam_height, scale_focal)
@@ -150,25 +150,25 @@ def draw_camera_boards(ax, camera_matrix, cam_width, cam_height, scale_focal,
     colors = [ cm.jet(x) for x in cm_subsection ]
 
     for i in range(len(X_static)):
-        X = np.zeros(X_static[i].shape)
+        X = mx.zeros(X_static[i].shape)
         for j in range(X_static[i].shape[1]):
-            X[:,j] = transform_to_matplotlib_frame(np.eye(4), X_static[i][:,j])
+            X[:,j] = transform_to_matplotlib_frame(mx.eye(4), X_static[i][:,j])
         ax.plot3D(X[0,:], X[1,:], X[2,:], color='r')
-        min_values = np.minimum(min_values, X[0:3,:].min(1))
-        max_values = np.maximum(max_values, X[0:3,:].max(1))
+        min_values = mx.minimum(min_values, X[0:3,:].min(1))
+        max_values = mx.maximum(max_values, X[0:3,:].max(1))
 
     for idx in range(extrinsics.shape[0]):
         R, _ = cv.Rodrigues(extrinsics[idx,0:3])
-        cMo = np.eye(4,4)
+        cMo = mx.eye(4,4)
         cMo[0:3,0:3] = R
         cMo[0:3,3] = extrinsics[idx,3:6]
         for i in range(len(X_moving)):
-            X = np.zeros(X_moving[i].shape)
+            X = mx.zeros(X_moving[i].shape)
             for j in range(X_moving[i].shape[1]):
                 X[0:4,j] = transform_to_matplotlib_frame(cMo, X_moving[i][0:4,j], patternCentric)
             ax.plot3D(X[0,:], X[1,:], X[2,:], color=colors[idx])
-            min_values = np.minimum(min_values, X[0:3,:].min(1))
-            max_values = np.maximum(max_values, X[0:3,:].max(1))
+            min_values = mx.minimum(min_values, X[0:3,:].min(1))
+            max_values = mx.maximum(max_values, X[0:3,:].max(1))
 
     return min_values, max_values
 
@@ -216,7 +216,7 @@ def main():
     Y_max = max_values[1]
     Z_min = min_values[2]
     Z_max = max_values[2]
-    max_range = np.array([X_max-X_min, Y_max-Y_min, Z_max-Z_min]).max() / 2.0
+    max_range = mx.array([X_max-X_min, Y_max-Y_min, Z_max-Z_min]).max() / 2.0
 
     mid_x = (X_max+X_min) * 0.5
     mid_y = (Y_max+Y_min) * 0.5

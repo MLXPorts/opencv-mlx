@@ -1,4 +1,4 @@
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import argparse
 import os
@@ -40,7 +40,7 @@ import os
         for i,init in enumerate(model.graph.initializer):
             model.graph.initializer.remove(init)
             init.data_type = 1
-            init.raw_data = np.frombuffer(init.raw_data, count=np.product(init.dims), dtype=np.float16).astype(np.float32).tobytes()
+            init.raw_data = mx.frombuffer(init.raw_data, count=mx.product(init.dims), dtype=mx.float16).astype(mx.float32).tobytes()
             model.graph.initializer.insert(i,init)
         ```
 
@@ -48,7 +48,7 @@ import os
         see https://github.com/opencv/opencv/issues/19091
         Make & insert a new node with 'Reshape' operation & required initializer
         ```
-            tensor = numpy_helper.from_array(np.array([0,64,-1]),name='shape_reshape')
+            tensor = numpy_helper.from_array(mx.array([0,64,-1]),name='shape_reshape')
             model.graph.initializer.insert(0,tensor)
             node = onnx.helper.make_node(op_type='Reshape',inputs=['input__0','shape_reshape'], outputs=['input_reshaped'], name='reshape__0')
             model.graph.node.insert(0,node)
@@ -76,30 +76,30 @@ class FilterbankFeatures:
         '''
         self.win_length = int(sample_rate * window_size) # frame size
         self.hop_length = int(sample_rate * window_stride) # stride
-        self.n_fft = n_fft or 2 ** np.ceil(np.log2(self.win_length))
+        self.n_fft = n_fft or 2 ** mx.ceil(mx.log2(self.win_length))
         self.log = log
         self.dither = dither
         self.n_filt = n_filt
         self.preemph = preemph
         highfreq = highfreq or sample_rate / 2
-        self.window_tensor = np.hanning(self.win_length)
+        self.window_tensor = mx.hanning(self.win_length)
 
         self.filterbanks = self.mel(sample_rate, self.n_fft, n_mels=n_filt, fmin=lowfreq, fmax=highfreq)
-        self.filterbanks.dtype=np.float32
-        self.filterbanks = np.expand_dims(self.filterbanks,0)
+        self.filterbanks.dtype=mx.float32
+        self.filterbanks = mx.expand_dims(self.filterbanks,0)
 
     def normalize_batch(self, x, seq_len):
         '''
             Normalizes the features.
         '''
-        x_mean = np.zeros((seq_len.shape[0], x.shape[1]), dtype=x.dtype)
-        x_std = np.zeros((seq_len.shape[0], x.shape[1]), dtype=x.dtype)
+        x_mean = mx.zeros((seq_len.shape[0], x.shape[1]), dtype=x.dtype)
+        x_std = mx.zeros((seq_len.shape[0], x.shape[1]), dtype=x.dtype)
         for i in range(x.shape[0]):
-            x_mean[i, :] = np.mean(x[i, :, :seq_len[i]],axis=1)
-            x_std[i, :] = np.std(x[i, :, :seq_len[i]],axis=1)
+            x_mean[i, :] = mx.mean(x[i, :, :seq_len[i]],axis=1)
+            x_std[i, :] = mx.std(x[i, :, :seq_len[i]],axis=1)
         # make sure x_std is not zero
         x_std += 1e-10
-        return (x - np.expand_dims(x_mean,2)) / np.expand_dims(x_std,2)
+        return (x - mx.expand_dims(x_mean,2)) / mx.expand_dims(x_std,2)
 
     def calculate_features(self, x, seq_len):
         '''
@@ -112,17 +112,17 @@ class FilterbankFeatures:
         '''
         dtype = x.dtype
 
-        seq_len = np.ceil(seq_len / self.hop_length)
-        seq_len = np.array(seq_len,dtype=np.int32)
+        seq_len = mx.ceil(seq_len / self.hop_length)
+        seq_len = mx.array(seq_len,dtype=mx.int32)
 
         # dither
         if self.dither > 0:
-            x += self.dither * np.random.randn(*x.shape)
+            x += self.dither * mx.random.randn(*x.shape)
 
         # do preemphasis
         if self.preemph is not None:
-            x = np.concatenate(
-                (np.expand_dims(x[0],-1), x[1:] - self.preemph * x[:-1]), axis=0)
+            x = mx.concatenate(
+                (mx.expand_dims(x[0],-1), x[1:] - self.preemph * x[:-1]), axis=0)
 
         # Short Time Fourier Transform
         x  = self.stft(x, n_fft=self.n_fft, hop_length=self.hop_length,
@@ -133,11 +133,11 @@ class FilterbankFeatures:
         x = (x**2).sum(-1)
 
         # dot with filterbank energies
-        x = np.matmul(np.array(self.filterbanks,dtype=x.dtype), x)
+        x = mx.matmul(mx.array(self.filterbanks,dtype=x.dtype), x)
 
         # log features if required
         if self.log:
-            x = np.log(x + 1e-20)
+            x = mx.log(x + 1e-20)
 
         # normalize if required
         x = self.normalize_batch(x, seq_len).astype(dtype)
@@ -148,7 +148,7 @@ class FilterbankFeatures:
         '''
             Converts frequencies from hz to mel scale. Input can be a number or a vector.
         '''
-        frequencies = np.asanyarray(frequencies)
+        frequencies = mx.asanyarray(frequencies)
 
         f_min = 0.0
         f_sp = 200.0 / 3
@@ -158,22 +158,22 @@ class FilterbankFeatures:
         # Fill in the log-scale part
         min_log_hz = 1000.0  # beginning of log region (Hz)
         min_log_mel = (min_log_hz - f_min) / f_sp  # same (Mels)
-        logstep = np.log(6.4) / 27.0  # step size for log region
+        logstep = mx.log(6.4) / 27.0  # step size for log region
 
         if frequencies.ndim:
             # If we have array data, vectorize
             log_t = frequencies >= min_log_hz
-            mels[log_t] = min_log_mel + np.log(frequencies[log_t] / min_log_hz) / logstep
+            mels[log_t] = min_log_mel + mx.log(frequencies[log_t] / min_log_hz) / logstep
         elif frequencies >= min_log_hz:
             # If we have scalar data, directly
-            mels = min_log_mel + np.log(frequencies / min_log_hz) / logstep
+            mels = min_log_mel + mx.log(frequencies / min_log_hz) / logstep
         return mels
 
     def mel_to_hz(self, mels):
         '''
             Converts frequencies from mel to hz scale. Input can be a number or a vector.
         '''
-        mels = np.asanyarray(mels)
+        mels = mx.asanyarray(mels)
 
         # Fill in the linear scale
         f_min = 0.0
@@ -183,15 +183,15 @@ class FilterbankFeatures:
         # And now the nonlinear scale
         min_log_hz = 1000.0  # beginning of log region (Hz)
         min_log_mel = (min_log_hz - f_min) / f_sp  # same (Mels)
-        logstep = np.log(6.4) / 27.0  # step size for log region
+        logstep = mx.log(6.4) / 27.0  # step size for log region
 
         if mels.ndim:
             # If we have vector data, vectorize
             log_t = mels >= min_log_mel
-            freqs[log_t] = min_log_hz * np.exp(logstep * (mels[log_t] - min_log_mel))
+            freqs[log_t] = min_log_hz * mx.exp(logstep * (mels[log_t] - min_log_mel))
         elif mels >= min_log_mel:
             # If we have scalar data, check directly
-            freqs = min_log_hz * np.exp(logstep * (mels - min_log_mel))
+            freqs = min_log_hz * mx.exp(logstep * (mels - min_log_mel))
 
         return freqs
 
@@ -209,11 +209,11 @@ class FilterbankFeatures:
         min_mel = self.hz_to_mel(fmin)
         max_mel = self.hz_to_mel(fmax)
 
-        mels = np.linspace(min_mel, max_mel, n_mels)
+        mels = mx.linspace(min_mel, max_mel, n_mels)
 
         return self.mel_to_hz(mels)
 
-    def mel(self, sr, n_fft, n_mels=128, fmin=0.0, fmax=None, dtype=np.float32):
+    def mel(self, sr, n_fft, n_mels=128, fmin=0.0, fmax=None, dtype=mx.float32):
         '''
             Generates mel filterbank
             args:
@@ -232,16 +232,16 @@ class FilterbankFeatures:
 
         # Initialize the weights
         n_mels = int(n_mels)
-        weights = np.zeros((n_mels, int(1 + n_fft // 2)), dtype=dtype)
+        weights = mx.zeros((n_mels, int(1 + n_fft // 2)), dtype=dtype)
 
         # Center freqs of each FFT bin
-        fftfreqs = np.linspace(0, float(sr) / 2, int(1 + n_fft // 2), endpoint=True)
+        fftfreqs = mx.linspace(0, float(sr) / 2, int(1 + n_fft // 2), endpoint=True)
 
         # 'Center freqs' of mel bands - uniformly spaced between limits
         mel_f = self.mel_frequencies(n_mels + 2, fmin=fmin, fmax=fmax)
 
-        fdiff = np.diff(mel_f)
-        ramps = np.subtract.outer(mel_f, fftfreqs)
+        fdiff = mx.diff(mel_f)
+        ramps = mx.subtract.outer(mel_f, fftfreqs)
 
         for i in range(n_mels):
             # lower and upper slopes for all bins
@@ -249,11 +249,11 @@ class FilterbankFeatures:
             upper = ramps[i + 2] / fdiff[i + 1]
 
             # .. then intersect them with each other and zero
-            weights[i] = np.maximum(0, np.minimum(lower, upper))
+            weights[i] = mx.maximum(0, mx.minimum(lower, upper))
 
         # Using Slaney-style mel which is scaled to be approx constant energy per channel
         enorm = 2.0 / (mel_f[2 : n_mels + 2] - mel_f[:n_mels])
-        weights *= enorm[:, np.newaxis]
+        weights *= enorm[:, mx.newaxis]
         return weights
 
     # STFT preparation
@@ -264,7 +264,7 @@ class FilterbankFeatures:
                 data : Vector to be padded and centered
                 size : Length to pad data
                 axis : Axis along which to pad and center the data
-                kwargs : arguments passed to np.pad
+                kwargs : arguments passed to mx.pad
             return : centered and padded data
         '''
         kwargs.setdefault("mode", "constant")
@@ -276,7 +276,7 @@ class FilterbankFeatures:
             raise Exception(
                 ("Target size ({:d}) must be at least input size ({:d})").format(size, n)
             )
-        return np.pad(data, lengths, **kwargs)
+        return mx.pad(data, lengths, **kwargs)
 
     def frame(self, x, frame_length, hop_length):
         '''
@@ -292,15 +292,15 @@ class FilterbankFeatures:
                 "Input is too short (n={:d})"
                 " for frame_length={:d}".format(x.shape[-1], frame_length)
             )
-        x = np.asfortranarray(x)
+        x = mx.asfortranarray(x)
         n_frames = 1 + (x.shape[-1] - frame_length) // hop_length
-        strides = np.asarray(x.strides)
-        new_stride = np.prod(strides[strides > 0] // x.itemsize) * x.itemsize
+        strides = mx.asarray(x.strides)
+        new_stride = mx.prod(strides[strides > 0] // x.itemsize) * x.itemsize
         shape = list(x.shape)[:-1] + [frame_length, n_frames]
         strides = list(strides) + [hop_length * new_stride]
-        return np.lib.stride_tricks.as_strided(x, shape=shape, strides=strides)
+        return mx.lib.stride_tricks.as_strided(x, shape=shape, strides=strides)
 
-    def dtype_r2c(self, d, default=np.complex64):
+    def dtype_r2c(self, d, default=mx.complex64):
         '''
             Find the complex numpy dtype corresponding to a real dtype.
             args:
@@ -309,13 +309,13 @@ class FilterbankFeatures:
             return : The complex dtype
         '''
         mapping = {
-            np.dtype(np.float32): np.complex64,
-            np.dtype(np.float64): np.complex128,
+            mx.dtype(mx.float32): mx.complex64,
+            mx.dtype(mx.float64): mx.complex128,
         }
-        dt = np.dtype(d)
+        dt = mx.dtype(d)
         if dt.kind == "c":
             return dt
-        return np.dtype(mapping.get(dt, default))
+        return mx.dtype(mapping.get(dt, default))
 
     def stft(self, y, n_fft, hop_length=None, win_length=None, fft_window=None, pad_mode='reflect', return_complex=False):
         '''
@@ -347,7 +347,7 @@ class FilterbankFeatures:
         fft_window = fft_window.reshape((-1, 1))
 
         # Pad the time series so that frames are centered
-        y = np.pad(y, int(n_fft // 2), mode=pad_mode)
+        y = mx.pad(y, int(n_fft // 2), mode=pad_mode)
 
         # Window the time series.
         y_frames = self.frame(y, frame_length=n_fft, hop_length=hop_length)
@@ -356,10 +356,10 @@ class FilterbankFeatures:
         dtype = self.dtype_r2c(y.dtype)
 
         # Pre-allocate the STFT matrix
-        stft_matrix = np.empty( (int(1 + n_fft // 2), y_frames.shape[-1]), dtype=dtype, order="F")
+        stft_matrix = mx.empty( (int(1 + n_fft // 2), y_frames.shape[-1]), dtype=dtype, order="F")
 
-        stft_matrix = np.fft.rfft( fft_window * y_frames, axis=0)
-        return stft_matrix if return_complex==True else np.stack((stft_matrix.real,stft_matrix.imag),axis=-1)
+        stft_matrix = mx.fft.rfft( fft_window * y_frames, axis=0)
+        return stft_matrix if return_complex==True else mx.stack((stft_matrix.real,stft_matrix.imag),axis=-1)
 
 class Decoder:
     '''
@@ -375,7 +375,7 @@ class Decoder:
             Takes output of Jasper model and performs ctc decoding algorithm to
             remove duplicates and special symbol. Returns prediction
         """
-        x = np.argmax(x,axis=-1)
+        x = mx.argmax(x,axis=-1)
         hypotheses = []
         prediction = x.tolist()
         # CTC decoding procedure
@@ -409,7 +409,7 @@ def predict(features, net, decoder):
 def readAudioFile(file, audioStream):
     cap = cv.VideoCapture(file)
     samplingRate = 16000
-    params = np.asarray([cv.CAP_PROP_AUDIO_STREAM, audioStream,
+    params = mx.asarray([cv.CAP_PROP_AUDIO_STREAM, audioStream,
               cv.CAP_PROP_VIDEO_STREAM, -1,
               cv.CAP_PROP_AUDIO_DATA_DEPTH, cv.CV_32F,
               cv.CAP_PROP_AUDIO_SAMPLES_PER_SECOND, samplingRate
@@ -422,19 +422,19 @@ def readAudioFile(file, audioStream):
     inputAudio = []
     while(1):
         if (cap.grab()):
-            frame = np.asarray([])
+            frame = mx.asarray([])
             frame = cap.retrieve(frame, audioBaseIndex)
             for i in range(len(frame[1][0])):
                 inputAudio.append(frame[1][0][i])
         else:
             break
-    inputAudio = np.asarray(inputAudio, dtype=np.float64)
+    inputAudio = mx.asarray(inputAudio, dtype=mx.float64)
     return inputAudio, samplingRate
 
 def readAudioMicrophone(microTime):
     cap = cv.VideoCapture()
     samplingRate = 16000
-    params = np.asarray([cv.CAP_PROP_AUDIO_STREAM, 0,
+    params = mx.asarray([cv.CAP_PROP_AUDIO_STREAM, 0,
               cv.CAP_PROP_VIDEO_STREAM, -1,
               cv.CAP_PROP_AUDIO_DATA_DEPTH, cv.CV_32F,
               cv.CAP_PROP_AUDIO_SAMPLES_PER_SECOND, samplingRate
@@ -451,7 +451,7 @@ def readAudioMicrophone(microTime):
     inputAudio = []
     while ((sysTimeCurr - sysTimePrev) / cvTickFreq < microTime):
         if (cap.grab()):
-            frame = np.asarray([])
+            frame = mx.asarray([])
             frame = cap.retrieve(frame, audioBaseIndex)
             for i in range(len(frame[1][0])):
                 inputAudio.append(frame[1][0][i])
@@ -459,7 +459,7 @@ def readAudioMicrophone(microTime):
         else:
             print("Error: Grab error")
             break
-    inputAudio = np.asarray(inputAudio, dtype=np.float64)
+    inputAudio = mx.asarray(inputAudio, dtype=mx.float64)
     print("Number of samples: ", len(inputAudio))
     return inputAudio, samplingRate
 
@@ -530,7 +530,7 @@ if __name__ == '__main__':
     feature_extractor = FilterbankFeatures()
     for i in range(len(features)):
         X = features[i]
-        seq_len = np.array([X.shape[0]], dtype=np.int32)
+        seq_len = mx.array([X.shape[0]], dtype=mx.int32)
         features[i] = feature_extractor.calculate_features(x=X, seq_len=seq_len)
 
     # Load Network

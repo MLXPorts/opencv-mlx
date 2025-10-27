@@ -1,6 +1,6 @@
 import cv2 as cv
 import argparse
-import numpy as np
+import mlx.core as mx
 import sys
 import copy
 import time
@@ -164,8 +164,8 @@ def postprocess(frame, outs):
             for detection in out:
                 scores = detection[4:]
                 if args.background_label_id >= 0:
-                    scores = np.delete(scores, args.background_label_id)
-                classId = np.argmax(scores)
+                    scores = mx.delete(scores, args.background_label_id)
+                classId = mx.argmax(scores)
                 confidence = scores[classId]
                 if confidence > confThreshold:
                     center_x = int(detection[0] * box_scale_w)
@@ -185,18 +185,18 @@ def postprocess(frame, outs):
     # or NMS is required if number of outputs > 1
     if len(outNames) > 1 or (lastLayer.type == 'Region' or args.postprocessing == 'yolov8') and args.backend != cv.dnn.DNN_BACKEND_OPENCV:
         indices = []
-        classIds = np.array(classIds)
-        boxes = np.array(boxes)
-        confidences = np.array(confidences)
+        classIds = mx.array(classIds)
+        boxes = mx.array(boxes)
+        confidences = mx.array(confidences)
         unique_classes = set(classIds)
         for cl in unique_classes:
-            class_indices = np.where(classIds == cl)[0]
+            class_indices = mx.where(classIds == cl)[0]
             conf = confidences[class_indices]
             box  = boxes[class_indices].tolist()
             nms_indices = cv.dnn.NMSBoxes(box, conf, confThreshold, nmsThreshold)
             indices.extend(class_indices[nms_indices])
     else:
-        indices = np.arange(0, len(classIds))
+        indices = mx.arange(0, len(classIds))
 
     for i in indices:
         box = boxes[i]
@@ -288,7 +288,7 @@ def processingThreadBody():
             net.setInput(blob, scalefactor=args.scale, mean=args.mean)
             if net.getLayer(0).outputNameToIndex('im_info') != -1:  # Faster-RCNN or R-FCN
                 frame = cv.resize(frame, (inpWidth, inpHeight))
-                net.setInput(np.array([[inpHeight, inpWidth, 1.6]], dtype=np.float32), 'im_info')
+                net.setInput(mx.array([[inpHeight, inpWidth, 1.6]], dtype=mx.float32), 'im_info')
 
             if args.asyncN:
                 futureOutputs.append(net.forwardAsync())

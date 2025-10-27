@@ -25,7 +25,7 @@ Use 'focal' slider to adjust to camera focal length for proper video augmentatio
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import video
 import common
@@ -33,7 +33,7 @@ from plane_tracker import PlaneTracker
 from video import presets
 
 # Simple model of a house - cube with a triangular prism "roof"
-ar_verts = np.float32([[0, 0, 0], [0, 1, 0], [1, 1, 0], [1, 0, 0],
+ar_verts = mx.float32([[0, 0, 0], [0, 1, 0], [1, 1, 0], [1, 0, 0],
                        [0, 0, 1], [0, 1, 1], [1, 1, 1], [1, 0, 1],
                        [0, 0.5, 2], [1, 0.5, 2]])
 ar_edges = [(0, 1), (1, 2), (2, 3), (3, 0),
@@ -68,8 +68,8 @@ class App:
             if playing:
                 tracked = self.tracker.track(self.frame)
                 for tr in tracked:
-                    cv.polylines(vis, [np.int32(tr.quad)], True, (255, 255, 255), 2)
-                    for (x, y) in np.int32(tr.p1):
+                    cv.polylines(vis, [mx.int32(tr.quad)], True, (255, 255, 255), 2)
+                    for (x, y) in mx.int32(tr.p1):
                         cv.circle(vis, (x, y), 2, (255, 255, 255))
                     self.draw_overlay(vis, tr)
 
@@ -85,13 +85,13 @@ class App:
 
     def draw_overlay(self, vis, tracked):
         x0, y0, x1, y1 = tracked.target.rect
-        quad_3d = np.float32([[x0, y0, 0], [x1, y0, 0], [x1, y1, 0], [x0, y1, 0]])
+        quad_3d = mx.float32([[x0, y0, 0], [x1, y0, 0], [x1, y1, 0], [x0, y1, 0]])
         fx = 0.5 + cv.getTrackbarPos('focal', 'plane') / 50.0
         h, w = vis.shape[:2]
-        K = np.float64([[fx*w, 0, 0.5*(w-1)],
+        K = mx.float64([[fx*w, 0, 0.5*(w-1)],
                         [0, fx*w, 0.5*(h-1)],
                         [0.0,0.0,      1.0]])
-        dist_coef = np.zeros(4)
+        dist_coef = mx.zeros(4)
         _ret, rvec, tvec = cv.solvePnP(quad_3d, tracked.quad, K, dist_coef)
         verts = ar_verts * [(x1-x0), (y1-y0), -(x1-x0)*0.3] + (x0, y0, 0)
         verts = cv.projectPoints(verts, rvec, tvec, K, dist_coef)[0].reshape(-1, 2)

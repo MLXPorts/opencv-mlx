@@ -18,7 +18,7 @@ Keys:
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 from common import Sketcher
@@ -36,7 +36,7 @@ def main():
         sys.exit(1)
 
     img_mark = img.copy()
-    mark = np.zeros(img.shape[:2], np.uint8)
+    mark = mx.zeros(img.shape[:2], mx.uint8)
     sketch = Sketcher('img', [img_mark, mark], lambda : ((255, 255, 255), 255))
 
     while True:

@@ -29,7 +29,7 @@ PY3 = sys.version_info[0] == 3
 if PY3:
     xrange = range
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 # built-in modules
@@ -85,7 +85,7 @@ class PlaneTracker:
             if x0 <= x <= x1 and y0 <= y <= y1:
                 points.append(kp)
                 descs.append(desc)
-        descs = np.uint8(descs)
+        descs = mx.uint8(descs)
         self.matcher.add([descs])
         target = PlanarTarget(image = image, rect=rect, keypoints = points, descrs=descs, data=data)
         self.targets.append(target)
@@ -114,7 +114,7 @@ class PlaneTracker:
             target = self.targets[imgIdx]
             p0 = [target.keypoints[m.trainIdx].pt for m in matches]
             p1 = [self.frame_points[m.queryIdx].pt for m in matches]
-            p0, p1 = np.float32((p0, p1))
+            p0, p1 = mx.float32((p0, p1))
             H, status = cv.findHomography(p0, p1, cv.RANSAC, 3.0)
             status = status.ravel() != 0
             if status.sum() < MIN_MATCH_COUNT:
@@ -122,7 +122,7 @@ class PlaneTracker:
             p0, p1 = p0[status], p1[status]
 
             x0, y0, x1, y1 = target.rect
-            quad = np.float32([[x0, y0], [x1, y0], [x1, y1], [x0, y1]])
+            quad = mx.float32([[x0, y0], [x1, y0], [x1, y1], [x0, y1]])
             quad = cv.perspectiveTransform(quad.reshape(1, -1, 2), H).reshape(-1, 2)
 
             track = TrackedTarget(target=target, p0=p0, p1=p1, H=H, quad=quad)
@@ -164,8 +164,8 @@ class App:
             if playing:
                 tracked = self.tracker.track(self.frame)
                 for tr in tracked:
-                    cv.polylines(vis, [np.int32(tr.quad)], True, (255, 255, 255), 2)
-                    for (x, y) in np.int32(tr.p1):
+                    cv.polylines(vis, [mx.int32(tr.quad)], True, (255, 255, 255), 2)
+                    for (x, y) in mx.int32(tr.p1):
                         cv.circle(vis, (x, y), 2, (255, 255, 255))
 
             self.rect_sel.draw(vis)

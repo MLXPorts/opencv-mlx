@@ -9,7 +9,7 @@ Resulting .ply file cam be easily viewed using MeshLab ( http://meshlab.sourcefo
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 ply_header = '''ply
@@ -27,10 +27,10 @@ end_header
 def write_ply(fn, verts, colors):
     verts = verts.reshape(-1, 3)
     colors = colors.reshape(-1, 3)
-    verts = np.hstack([verts, colors])
+    verts = mx.hstack([verts, colors])
     with open(fn, 'wb') as f:
         f.write((ply_header % dict(vert_num=len(verts))).encode('utf-8'))
-        np.savetxt(f, verts, fmt='%f %f %f %d %d %d ')
+        mx.savetxt(f, verts, fmt='%f %f %f %d %d %d ')
 
 
 def main():
@@ -54,12 +54,12 @@ def main():
     )
 
     print('computing disparity...')
-    disp = stereo.compute(imgL, imgR).astype(np.float32) / 16.0
+    disp = stereo.compute(imgL, imgR).astype(mx.float32) / 16.0
 
     print('generating 3d point cloud...',)
     h, w = imgL.shape[:2]
     f = 0.8*w                          # guess for focal length
-    Q = np.float32([[1, 0, 0, -0.5*w],
+    Q = mx.float32([[1, 0, 0, -0.5*w],
                     [0,-1, 0,  0.5*h], # turn points 180 deg around x-axis,
                     [0, 0, 0,     -f], # so that y-axis looks up
                     [0, 0, 1,      0]])

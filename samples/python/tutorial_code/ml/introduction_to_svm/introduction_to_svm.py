@@ -1,10 +1,10 @@
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 
 # Set up training data
 ## [setup1]
-labels = np.array([1, -1, -1, -1])
-trainingData = np.matrix([[501, 10], [255, 10], [501, 255], [10, 501]], dtype=np.float32)
+labels = mx.array([1, -1, -1, -1])
+trainingData = mx.matrix([[501, 10], [255, 10], [501, 255], [10, 501]], dtype=mx.float32)
 ## [setup1]
 
 # Train the SVM
@@ -21,7 +21,7 @@ svm.train(trainingData, cv.ml.ROW_SAMPLE, labels)
 # Data for visual representation
 width = 512
 height = 512
-image = np.zeros((height, width, 3), dtype=np.uint8)
+image = mx.zeros((height, width, 3), dtype=mx.uint8)
 
 # Show the decision regions given by the SVM
 ## [show]
@@ -29,7 +29,7 @@ green = (0,255,0)
 blue = (255,0,0)
 for i in range(image.shape[0]):
     for j in range(image.shape[1]):
-        sampleMat = np.matrix([[j,i]], dtype=np.float32)
+        sampleMat = mx.matrix([[j,i]], dtype=mx.float32)
         response = svm.predict(sampleMat)[1]
 
         if response == 1:

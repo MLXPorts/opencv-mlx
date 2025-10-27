@@ -1,5 +1,5 @@
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 
 W = 400
 ## [my_ellipse]
@@ -34,7 +34,7 @@ def my_polygon(img):
     line_type = 8
 
     # Create some points
-    ppt = np.array([[W / 4, 7 * W / 8], [3 * W / 4, 7 * W / 8],
+    ppt = mx.array([[W / 4, 7 * W / 8], [3 * W / 4, 7 * W / 8],
                     [3 * W / 4, 13 * W / 16], [11 * W / 16, 13 * W / 16],
                     [19 * W / 32, 3 * W / 8], [3 * W / 4, 3 * W / 8],
                     [3 * W / 4, W / 8], [26 * W / 40, W / 8],
@@ -43,7 +43,7 @@ def my_polygon(img):
                     [18 * W / 40, W / 4], [14 * W / 40, W / 4],
                     [14 * W / 40, W / 8], [W / 4, W / 8],
                     [W / 4, 3 * W / 8], [13 * W / 32, 3 * W / 8],
-                    [5 * W / 16, 13 * W / 16], [W / 4, 13 * W / 16]], np.int32)
+                    [5 * W / 16, 13 * W / 16], [W / 4, 13 * W / 16]], mx.int32)
     ppt = ppt.reshape((-1, 1, 2))
     cv.fillPoly(img, [ppt], (255, 255, 255), line_type)
     # Only drawind the lines would be:
@@ -68,8 +68,8 @@ rook_window = "Drawing 2: Rook"
 
 # Create black empty images
 size = W, W, 3
-atom_image = np.zeros(size, dtype=np.uint8)
-rook_image = np.zeros(size, dtype=np.uint8)
+atom_image = mx.zeros(size, dtype=mx.uint8)
+rook_image = mx.zeros(size, dtype=mx.uint8)
 ## [create_images]
 ## [draw_atom]
 # 1. Draw a simple atom:

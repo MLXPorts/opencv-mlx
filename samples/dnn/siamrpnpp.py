@@ -1,6 +1,6 @@
 import argparse
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import os
 
 """
@@ -38,8 +38,8 @@ class ModelBuilder():
         self.search_net.setInput(x)
         outNames = self.search_net.getUnconnectedOutLayersNames()
         xfs_1, xfs_2, xfs_3 = self.search_net.forward(outNames)
-        self.rpn_head.setInput(np.stack([self.zfs_1, self.zfs_2, self.zfs_3]), 'input_1')
-        self.rpn_head.setInput(np.stack([xfs_1, xfs_2, xfs_3]), 'input_2')
+        self.rpn_head.setInput(mx.stack([self.zfs_1, self.zfs_2, self.zfs_3]), 'input_1')
+        self.rpn_head.setInput(mx.stack([xfs_1, xfs_2, xfs_3]), 'input_2')
         outNames = self.rpn_head.getUnconnectedOutLayersNames()
         cls, loc = self.rpn_head.forward(outNames)
         return {'cls': cls, 'loc': loc}
@@ -60,11 +60,11 @@ class Anchors:
         """
         generate anchors based on predefined configuration
         """
-        anchors = np.zeros((self.anchor_num, 4), dtype=np.float32)
+        anchors = mx.zeros((self.anchor_num, 4), dtype=mx.float32)
         size = self.stride**2
         count = 0
         for r in self.ratios:
-            ws = int(np.sqrt(size * 1. / r))
+            ws = int(mx.sqrt(size * 1. / r))
             hs = int(ws * r)
 
             for s in self.scales:
@@ -90,9 +90,9 @@ class SiamRPNTracker:
         self.score_size = (self.track_instance_size - self.track_exemplar_size) // \
                           self.anchor_stride + 1 + self.track_base_size
         self.anchor_num = len(self.anchor_ratios) * len(self.anchor_scales)
-        hanning = np.hanning(self.score_size)
-        window = np.outer(hanning, hanning)
-        self.window = np.tile(window.flatten(), self.anchor_num)
+        hanning = mx.hanning(self.score_size)
+        window = mx.outer(hanning, hanning)
+        self.window = mx.tile(window.flatten(), self.anchor_num)
         self.anchors = self.generate_anchor(self.score_size)
         self.model = model
 
@@ -113,9 +113,9 @@ class SiamRPNTracker:
         im_h, im_w, im_d = im.shape
         c = (original_sz + 1) / 2
         cx, cy = pos
-        context_xmin = np.floor(cx - c + 0.5)
+        context_xmin = mx.floor(cx - c + 0.5)
         context_xmax = context_xmin + sz - 1
-        context_ymin = np.floor(cy - c + 0.5)
+        context_ymin = mx.floor(cy - c + 0.5)
         context_ymax = context_ymin + sz - 1
         left_pad = int(max(0., -context_xmin))
         top_pad = int(max(0., -context_ymin))
@@ -128,7 +128,7 @@ class SiamRPNTracker:
 
         if any([top_pad, bottom_pad, left_pad, right_pad]):
             size = (im_h + top_pad + bottom_pad, im_w + left_pad + right_pad, im_d)
-            te_im = np.zeros(size, np.uint8)
+            te_im = mx.zeros(size, mx.uint8)
             te_im[top_pad:top_pad + im_h, left_pad:left_pad + im_w, :] = im
             if top_pad:
                 te_im[0:top_pad, left_pad:left_pad + im_w, :] = avg_chans
@@ -144,11 +144,11 @@ class SiamRPNTracker:
             im_patch = im[int(context_ymin):int(context_ymax + 1),
                        int(context_xmin):int(context_xmax + 1), :]
 
-        if not np.array_equal(model_sz, original_sz):
+        if not mx.array_equal(model_sz, original_sz):
             im_patch = cv.resize(im_patch, (model_sz, model_sz))
         im_patch = im_patch.transpose(2, 0, 1)
-        im_patch = im_patch[np.newaxis, :, :, :]
-        im_patch = im_patch.astype(np.float32)
+        im_patch = im_patch[mx.newaxis, :, :, :]
+        im_patch = im_patch.astype(mx.float32)
         return im_patch
 
     def generate_anchor(self, score_size):
@@ -165,16 +165,16 @@ class SiamRPNTracker:
         anchors = Anchors(self.anchor_stride, self.anchor_ratios, self.anchor_scales)
         anchor = anchors.anchors
         x1, y1, x2, y2 = anchor[:, 0], anchor[:, 1], anchor[:, 2], anchor[:, 3]
-        anchor = np.stack([(x1 + x2) * 0.5, (y1 + y2) * 0.5, x2 - x1, y2 - y1], 1)
+        anchor = mx.stack([(x1 + x2) * 0.5, (y1 + y2) * 0.5, x2 - x1, y2 - y1], 1)
         total_stride = anchors.stride
         anchor_num = anchors.anchor_num
-        anchor = np.tile(anchor, score_size * score_size).reshape((-1, 4))
+        anchor = mx.tile(anchor, score_size * score_size).reshape((-1, 4))
         ori = - (score_size // 2) * total_stride
-        xx, yy = np.meshgrid([ori + total_stride * dx for dx in range(score_size)],
+        xx, yy = mx.meshgrid([ori + total_stride * dx for dx in range(score_size)],
                              [ori + total_stride * dy for dy in range(score_size)])
-        xx, yy = np.tile(xx.flatten(), (anchor_num, 1)).flatten(), \
-                 np.tile(yy.flatten(), (anchor_num, 1)).flatten()
-        anchor[:, 0], anchor[:, 1] = xx.astype(np.float32), yy.astype(np.float32)
+        xx, yy = mx.tile(xx.flatten(), (anchor_num, 1)).flatten(), \
+                 mx.tile(yy.flatten(), (anchor_num, 1)).flatten()
+        anchor[:, 0], anchor[:, 1] = xx.astype(mx.float32), yy.astype(mx.float32)
         return anchor
 
     def _convert_bbox(self, delta, anchor):
@@ -185,23 +185,23 @@ class SiamRPNTracker:
         Return:
             delta:      prediction of bounding box
         """
-        delta_transpose = np.transpose(delta, (1, 2, 3, 0))
-        delta_contig = np.ascontiguousarray(delta_transpose)
+        delta_transpose = mx.transpose(delta, (1, 2, 3, 0))
+        delta_contig = mx.ascontiguousarray(delta_transpose)
         delta = delta_contig.reshape(4, -1)
         delta[0, :] = delta[0, :] * anchor[:, 2] + anchor[:, 0]
         delta[1, :] = delta[1, :] * anchor[:, 3] + anchor[:, 1]
-        delta[2, :] = np.exp(delta[2, :]) * anchor[:, 2]
-        delta[3, :] = np.exp(delta[3, :]) * anchor[:, 3]
+        delta[2, :] = mx.exp(delta[2, :]) * anchor[:, 2]
+        delta[3, :] = mx.exp(delta[3, :]) * anchor[:, 3]
         return delta
 
     def _softmax(self, x):
         """
         Softmax in the direction of the depth of the layer
         """
-        x = x.astype(dtype=np.float32)
-        x_max = x.max(axis=1)[:, np.newaxis]
-        e_x = np.exp(x-x_max)
-        div = np.sum(e_x, axis=1)[:, np.newaxis]
+        x = x.astype(dtype=mx.float32)
+        x_max = x.max(axis=1)[:, mx.newaxis]
+        e_x = mx.exp(x-x_max)
+        div = mx.sum(e_x, axis=1)[:, mx.newaxis]
         y = e_x / div
         return y
 
@@ -212,10 +212,10 @@ class SiamRPNTracker:
         Return:
             cls:        score for cls
         """
-        score_transpose = np.transpose(score, (1, 2, 3, 0))
-        score_con = np.ascontiguousarray(score_transpose)
+        score_transpose = mx.transpose(score, (1, 2, 3, 0))
+        score_con = mx.ascontiguousarray(score_transpose)
         score_view = score_con.reshape(2, -1)
-        score = np.transpose(score_view, (1, 0))
+        score = mx.transpose(score_view, (1, 0))
         score = self._softmax(score)
         return score[:,1]
 
@@ -233,30 +233,30 @@ class SiamRPNTracker:
     def init(self, img, bbox):
         """
         Args:
-            img(np.ndarray):    bgr based input image frame
+            img(mx.ndarray):    bgr based input image frame
             bbox: (x, y, w, h): bounding box
         """
         x, y, w, h = bbox
-        self.center_pos = np.array([x + (w - 1) / 2, y + (h - 1) / 2])
+        self.center_pos = mx.array([x + (w - 1) / 2, y + (h - 1) / 2])
         self.h = h
         self.w = w
-        w_z = self.w + self.track_context_amount * np.add(h, w)
-        h_z = self.h + self.track_context_amount * np.add(h, w)
-        s_z = round(np.sqrt(w_z * h_z))
-        self.channel_average = np.mean(img, axis=(0, 1))
+        w_z = self.w + self.track_context_amount * mx.add(h, w)
+        h_z = self.h + self.track_context_amount * mx.add(h, w)
+        s_z = round(mx.sqrt(w_z * h_z))
+        self.channel_average = mx.mean(img, axis=(0, 1))
         z_crop = self.get_subwindow(img, self.center_pos, self.track_exemplar_size, s_z, self.channel_average)
         self.model.template(z_crop)
 
     def track(self, img):
         """
         Args:
-            img(np.ndarray): BGR image
+            img(mx.ndarray): BGR image
         Return:
             bbox(list):[x, y, width, height]
         """
-        w_z = self.w + self.track_context_amount * np.add(self.w, self.h)
-        h_z = self.h + self.track_context_amount * np.add(self.w, self.h)
-        s_z = np.sqrt(w_z * h_z)
+        w_z = self.w + self.track_context_amount * mx.add(self.w, self.h)
+        h_z = self.h + self.track_context_amount * mx.add(self.w, self.h)
+        s_z = mx.sqrt(w_z * h_z)
         scale_z = self.track_exemplar_size / s_z
         s_x = s_z * (self.track_instance_size / self.track_exemplar_size)
         x_crop = self.get_subwindow(img, self.center_pos, self.track_instance_size, round(s_x), self.channel_average)
@@ -265,11 +265,11 @@ class SiamRPNTracker:
         pred_bbox = self._convert_bbox(outputs['loc'], self.anchors)
 
         def change(r):
-            return np.maximum(r, 1. / r)
+            return mx.maximum(r, 1. / r)
 
         def sz(w, h):
             pad = (w + h) * 0.5
-            return np.sqrt((w + pad) * (h + pad))
+            return mx.sqrt((w + pad) * (h + pad))
 
         # scale penalty
         s_c = change(sz(pred_bbox[2, :], pred_bbox[3, :]) /
@@ -278,13 +278,13 @@ class SiamRPNTracker:
         # aspect ratio penalty
         r_c = change((self.w / self.h) /
                      (pred_bbox[2, :] / pred_bbox[3, :]))
-        penalty = np.exp(-(r_c * s_c - 1) * self.track_penalty_k)
+        penalty = mx.exp(-(r_c * s_c - 1) * self.track_penalty_k)
         pscore = penalty * score
 
         # window penalty
         pscore = pscore * (1 - self.track_window_influence) + \
                  self.window * self.track_window_influence
-        best_idx = np.argmax(pscore)
+        best_idx = mx.argmax(pscore)
         bbox = pred_bbox[:, best_idx] / scale_z
         lr = penalty[best_idx] * score[best_idx] * self.track_lr
 
@@ -301,7 +301,7 @@ class SiamRPNTracker:
         cx, cy, width, height = self._bbox_clip(cx, cy, width, height, img.shape[:2])
 
         # update state
-        self.center_pos = np.array([cx, cy])
+        self.center_pos = mx.array([cx, cy])
         self.w = width
         self.h = height
         bbox = [cx - width / 2, cy - height / 2, width, height]

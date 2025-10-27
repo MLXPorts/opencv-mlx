@@ -18,13 +18,13 @@ Abid Rahman 3/14/12 debug Gary Bradski
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
-bins = np.arange(256).reshape(256,1)
+bins = mx.arange(256).reshape(256,1)
 
 def hist_curve(im):
-    h = np.zeros((300,256,3))
+    h = mx.zeros((300,256,3))
     if len(im.shape) == 2:
         color = [(255,255,255)]
     elif im.shape[2] == 3:
@@ -32,24 +32,24 @@ def hist_curve(im):
     for ch, col in enumerate(color):
         hist_item = cv.calcHist([im],[ch],None,[256],[0,256])
         cv.normalize(hist_item,hist_item,0,255,cv.NORM_MINMAX)
-        hist=np.int32(np.around(hist_item))
-        pts = np.int32(np.column_stack((bins,hist)))
+        hist=mx.int32(mx.around(hist_item))
+        pts = mx.int32(mx.column_stack((bins,hist)))
         cv.polylines(h,[pts],False,col)
-    y=np.flipud(h)
+    y=mx.flipud(h)
     return y
 
 def hist_lines(im):
-    h = np.zeros((300,256,3))
+    h = mx.zeros((300,256,3))
     if len(im.shape)!=2:
         print("hist_lines applicable only for grayscale images")
         #print("so converting image to grayscale for representation"
         im = cv.cvtColor(im,cv.COLOR_BGR2GRAY)
     hist_item = cv.calcHist([im],[0],None,[256],[0,256])
     cv.normalize(hist_item,hist_item,0,255,cv.NORM_MINMAX)
-    hist = np.int32(np.around(hist_item))
+    hist = mx.int32(mx.around(hist_item))
     for x,y in enumerate(hist):
         cv.line(h,(x,0),(x,y[0]),(255,255,255))
-    y = np.flipud(h)
+    y = mx.flipud(h)
     return y
 
 

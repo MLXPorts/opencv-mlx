@@ -1,7 +1,7 @@
 from __future__ import print_function
 from __future__ import division
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 import random as rng
 
@@ -33,7 +33,7 @@ def thresh_callback(val):
 
     # Draw contours
     ## [zeroMat]
-    drawing = np.zeros((canny_output.shape[0], canny_output.shape[1], 3), dtype=np.uint8)
+    drawing = mx.zeros((canny_output.shape[0], canny_output.shape[1], 3), dtype=mx.uint8)
     ## [zeroMat]
     ## [forContour]
     for i in range(len(contours)):

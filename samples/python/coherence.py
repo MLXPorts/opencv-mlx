@@ -17,7 +17,7 @@ PY3 = sys.version_info[0] == 3
 if PY3:
     xrange = range
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 def coherence_filter(img, sigma = 11, str_sigma = 11, blend = 0.5, iter_n = 4):
@@ -41,7 +41,7 @@ def coherence_filter(img, sigma = 11, str_sigma = 11, blend = 0.5, iter_n = 4):
         dil = cv.dilate(img, None)
         img1 = ero
         img1[m] = dil[m]
-        img = np.uint8(img*(1.0 - blend) + img1*blend)
+        img = mx.uint8(img*(1.0 - blend) + img1*blend)
     print('done')
     return img
 

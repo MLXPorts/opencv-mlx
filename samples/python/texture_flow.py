@@ -13,7 +13,7 @@ Usage:
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 def main():
@@ -36,11 +36,11 @@ def main():
     flow = eigen[:,:,2]
 
     vis = img.copy()
-    vis[:] = (192 + np.uint32(vis)) / 2
+    vis[:] = (192 + mx.uint32(vis)) / 2
     d = 12
-    points =  np.dstack( np.mgrid[d/2:w:d, d/2:h:d] ).reshape(-1, 2)
-    for x, y in np.int32(points):
-        vx, vy = np.int32(flow[y, x]*d)
+    points =  mx.dstack( mx.mgrid[d/2:w:d, d/2:h:d] ).reshape(-1, 2)
+    for x, y in mx.int32(points):
+        vx, vy = mx.int32(flow[y, x]*d)
         cv.line(vis, (x-vx, y-vy), (x+vx, y+vy), (0, 0, 0), 1, cv.LINE_AA)
     cv.imshow('input', img)
     cv.imshow('flow', vis)

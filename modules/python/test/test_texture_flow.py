@@ -10,7 +10,7 @@ to estimate image texture flow direction.
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import sys
 
@@ -33,11 +33,11 @@ class texture_flow_test(NewOpenCVTests):
         d = 300
         eps = d / 30
 
-        points =  np.dstack( np.mgrid[d/2:w:d, d/2:h:d] ).reshape(-1, 2)
+        points =  mx.dstack( mx.mgrid[d/2:w:d, d/2:h:d] ).reshape(-1, 2)
 
         textureVectors = []
-        for x, y in np.int32(points):
-            textureVectors.append(np.int32(flow[y, x]*d))
+        for x, y in mx.int32(points):
+            textureVectors.append(mx.int32(flow[y, x]*d))
 
         for i in range(len(textureVectors)):
             self.assertTrue(cv.norm(textureVectors[i], cv.NORM_L2) < eps

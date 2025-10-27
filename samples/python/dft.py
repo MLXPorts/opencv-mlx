@@ -11,7 +11,7 @@ USAGE:
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 import sys
@@ -26,14 +26,14 @@ def shift_dft(src, dst=None):
     '''
 
     if dst is None:
-        dst = np.empty(src.shape, src.dtype)
+        dst = mx.empty(src.shape, src.dtype)
     elif src.shape != dst.shape:
         raise ValueError("src and dst must have equal sizes")
     elif src.dtype != dst.dtype:
         raise TypeError("src and dst must have equal types")
 
     if src is dst:
-        ret = np.empty(src.shape, src.dtype)
+        ret = mx.empty(src.shape, src.dtype)
     else:
         ret = dst
 
@@ -77,14 +77,14 @@ def main():
     im = cv.cvtColor(im, cv.COLOR_BGR2GRAY)
     h, w = im.shape[:2]
 
-    realInput = im.astype(np.float64)
+    realInput = im.astype(mx.float64)
 
     # perform an optimally sized dft
     dft_M = cv.getOptimalDFTSize(w)
     dft_N = cv.getOptimalDFTSize(h)
 
     # copy A to dft_A and pad dft_A with zeros
-    dft_A = np.zeros((dft_N, dft_M, 2), dtype=np.float64)
+    dft_A = mx.zeros((dft_N, dft_M, 2), dtype=mx.float64)
     dft_A[:h, :w, 0] = realInput
 
     # no need to pad bottom part of dft_A with zeros because of

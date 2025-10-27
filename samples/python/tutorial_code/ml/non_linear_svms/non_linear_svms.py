@@ -1,6 +1,6 @@
 from __future__ import print_function
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import random as rng
 
 NTRAINING_SAMPLES = 100 # Number of training samples per class
@@ -9,11 +9,11 @@ FRAC_LINEAR_SEP = 0.9   # Fraction of samples which compose the linear separable
 # Data for visual representation
 WIDTH = 512
 HEIGHT = 512
-I = np.zeros((HEIGHT, WIDTH, 3), dtype=np.uint8)
+I = mx.zeros((HEIGHT, WIDTH, 3), dtype=mx.uint8)
 
 # --------------------- 1. Set up training data randomly ---------------------------------------
-trainData = np.empty((2*NTRAINING_SAMPLES, 2), dtype=np.float32)
-labels = np.empty((2*NTRAINING_SAMPLES, 1), dtype=np.int32)
+trainData = mx.empty((2*NTRAINING_SAMPLES, 2), dtype=mx.float32)
+labels = mx.empty((2*NTRAINING_SAMPLES, 1), dtype=mx.int32)
 
 rng.seed(100) # Random value generation class
 
@@ -25,19 +25,19 @@ nLinearSamples = int(FRAC_LINEAR_SEP * NTRAINING_SAMPLES)
 trainClass = trainData[0:nLinearSamples,:]
 # The x coordinate of the points is in [0, 0.4)
 c = trainClass[:,0:1]
-c[:] = np.random.uniform(0.0, 0.4 * WIDTH, c.shape)
+c[:] = mx.random.uniform(0.0, 0.4 * WIDTH, c.shape)
 # The y coordinate of the points is in [0, 1)
 c = trainClass[:,1:2]
-c[:] = np.random.uniform(0.0, HEIGHT, c.shape)
+c[:] = mx.random.uniform(0.0, HEIGHT, c.shape)
 
 # Generate random points for the class 2
 trainClass = trainData[2*NTRAINING_SAMPLES-nLinearSamples:2*NTRAINING_SAMPLES,:]
 # The x coordinate of the points is in [0.6, 1]
 c = trainClass[:,0:1]
-c[:] = np.random.uniform(0.6*WIDTH, WIDTH, c.shape)
+c[:] = mx.random.uniform(0.6*WIDTH, WIDTH, c.shape)
 # The y coordinate of the points is in [0, 1)
 c = trainClass[:,1:2]
-c[:] = np.random.uniform(0.0, HEIGHT, c.shape)
+c[:] = mx.random.uniform(0.0, HEIGHT, c.shape)
 ## [setup1]
 
 #------------------ Set up the non-linearly separable part of the training data ---------------
@@ -46,10 +46,10 @@ c[:] = np.random.uniform(0.0, HEIGHT, c.shape)
 trainClass = trainData[nLinearSamples:2*NTRAINING_SAMPLES-nLinearSamples,:]
 # The x coordinate of the points is in [0.4, 0.6)
 c = trainClass[:,0:1]
-c[:] = np.random.uniform(0.4*WIDTH, 0.6*WIDTH, c.shape)
+c[:] = mx.random.uniform(0.4*WIDTH, 0.6*WIDTH, c.shape)
 # The y coordinate of the points is in [0, 1)
 c = trainClass[:,1:2]
-c[:] = np.random.uniform(0.0, HEIGHT, c.shape)
+c[:] = mx.random.uniform(0.0, HEIGHT, c.shape)
 ## [setup2]
 
 #------------------------- Set up the labels for the classes ---------------------------------
@@ -78,7 +78,7 @@ green = (0,100,0)
 blue = (100,0,0)
 for i in range(I.shape[0]):
     for j in range(I.shape[1]):
-        sampleMat = np.matrix([[j,i]], dtype=np.float32)
+        sampleMat = mx.matrix([[j,i]], dtype=mx.float32)
         response = svm.predict(sampleMat)[1]
 
         if response == 1:

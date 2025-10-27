@@ -1,6 +1,6 @@
 from __future__ import print_function
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 
 parser = argparse.ArgumentParser(description='Code for Feature Matching with FLANN tutorial.')
@@ -33,12 +33,12 @@ for m,n in knn_matches:
         good_matches.append(m)
 
 #-- Draw matches
-img_matches = np.empty((max(img_object.shape[0], img_scene.shape[0]), img_object.shape[1]+img_scene.shape[1], 3), dtype=np.uint8)
+img_matches = mx.empty((max(img_object.shape[0], img_scene.shape[0]), img_object.shape[1]+img_scene.shape[1], 3), dtype=mx.uint8)
 cv.drawMatches(img_object, keypoints_obj, img_scene, keypoints_scene, good_matches, img_matches, flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
 
 #-- Localize the object
-obj = np.empty((len(good_matches),2), dtype=np.float32)
-scene = np.empty((len(good_matches),2), dtype=np.float32)
+obj = mx.empty((len(good_matches),2), dtype=mx.float32)
+scene = mx.empty((len(good_matches),2), dtype=mx.float32)
 for i in range(len(good_matches)):
     #-- Get the keypoints from the good matches
     obj[i,0] = keypoints_obj[good_matches[i].queryIdx].pt[0]
@@ -49,7 +49,7 @@ for i in range(len(good_matches)):
 H, _ =  cv.findHomography(obj, scene, cv.RANSAC)
 
 #-- Get the corners from the image_1 ( the object to be "detected" )
-obj_corners = np.empty((4,1,2), dtype=np.float32)
+obj_corners = mx.empty((4,1,2), dtype=mx.float32)
 obj_corners[0,0,0] = 0
 obj_corners[0,0,1] = 0
 obj_corners[1,0,0] = img_object.shape[1]

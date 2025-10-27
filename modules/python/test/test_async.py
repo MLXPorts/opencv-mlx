@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 from tests_common import NewOpenCVTests
@@ -9,7 +9,7 @@ from tests_common import NewOpenCVTests
 class AsyncTest(NewOpenCVTests):
 
     def test_async_simple(self):
-        m = np.array([[1,2],[3,4],[5,6]])
+        m = mx.array([[1,2],[3,4],[5,6]])
         async_result = cv.utils.testAsyncArray(m)
         self.assertTrue(async_result.valid())
         ret, result = async_result.get(timeoutNs=10**6)  # 1ms

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import os
 import sys
@@ -240,7 +240,7 @@ try:
 
             net.setInput(blob)
             dnn_detections = net.forward()
-            dnn_boxes = parseSSD(np.array(dnn_detections), img.shape[:2])
+            dnn_boxes = parseSSD(mx.array(dnn_detections), img.shape[:2])
 
             # OpenCV G-API
             g_in   = cv.GMat()
@@ -255,12 +255,12 @@ try:
             comp = cv.GComputation(cv.GIn(g_in), cv.GOut(bboxes))
             pp = cv.gapi.ie.params("net", model_path, weights_path, device_id)
 
-            gapi_boxes = comp.apply(cv.gin(img.astype(np.float32)),
+            gapi_boxes = comp.apply(cv.gin(img.astype(mx.float32)),
                                     args=cv.gapi.compile_args(cv.gapi.networks(pp)))
 
             # Comparison
-            self.assertEqual(0.0, cv.norm(np.array(dnn_boxes).flatten(),
-                                          np.array(gapi_boxes).flatten(),
+            self.assertEqual(0.0, cv.norm(mx.array(dnn_boxes).flatten(),
+                                          mx.array(gapi_boxes).flatten(),
                                           cv.NORM_INF))
 
 
@@ -299,7 +299,7 @@ try:
 
             net.setInput(blob)
             dnn_detections = net.forward()
-            dnn_boxes = parseSSD(np.array(dnn_detections), img.shape[:2])
+            dnn_boxes = parseSSD(mx.array(dnn_detections), img.shape[:2])
 
             # OpenCV G-API
             g_in   = cv.GMat()
@@ -314,12 +314,12 @@ try:
             comp = cv.GComputation(cv.GIn(g_in), cv.GOut(bboxes))
             pp = cv.gapi.ie.params("net", model_path, weights_path, device_id)
 
-            gapi_boxes = comp.apply(cv.gin(img.astype(np.float32)),
+            gapi_boxes = comp.apply(cv.gin(img.astype(mx.float32)),
                                     args=cv.gapi.compile_args(cv.gapi.networks(pp)))
 
             # Comparison
-            self.assertEqual(0.0, cv.norm(np.array(dnn_boxes).flatten(),
-                                          np.array(gapi_boxes).flatten(),
+            self.assertEqual(0.0, cv.norm(mx.array(dnn_boxes).flatten(),
+                                          mx.array(gapi_boxes).flatten(),
                                           cv.NORM_INF))
 
 

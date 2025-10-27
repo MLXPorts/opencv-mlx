@@ -1,6 +1,6 @@
 from __future__ import division
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 
 # Snippet code for Operations with images tutorial (not intended to be run)
 
@@ -21,7 +21,7 @@ def load():
 
 def access_pixel():
     # Accessing pixel intensity values
-    img = np.empty((4,4,3), np.uint8)
+    img = mx.empty((4,4,3), mx.uint8)
     y = 0
     x = 0
     ## [Pixel access 1]
@@ -42,7 +42,7 @@ def reference_counting():
     # Memory management and reference counting
     ## [Reference counting 2]
     img = cv.imread('image.jpg')
-    _img1 = np.copy(img)
+    _img1 = mx.copy(img)
     ## [Reference counting 2]
 
     ## [Reference counting 3]
@@ -51,7 +51,7 @@ def reference_counting():
     ## [Reference counting 3]
 
 def primitive_operations():
-    img = np.empty((4,4,3), np.uint8)
+    img = mx.empty((4,4,3), mx.uint8)
     ## [Set image to black]
     img[:] = 0
     ## [Set image to black]
@@ -65,9 +65,9 @@ def primitive_operations():
     _grey = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     ## [BGR to Gray]
 
-    src = np.ones((4,4), np.uint8)
+    src = mx.ones((4,4), mx.uint8)
     ## [Convert to CV_32F]
-    _dst = src.astype(np.float32)
+    _dst = src.astype(mx.float32)
     ## [Convert to CV_32F]
 
 def visualize_images():
@@ -83,8 +83,8 @@ def visualize_images():
     grey = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     sobelx = cv.Sobel(grey, cv.CV_32F, 1, 0)
     # find minimum and maximum intensities
-    minVal = np.amin(sobelx)
-    maxVal = np.amax(sobelx)
+    minVal = mx.amin(sobelx)
+    maxVal = mx.amax(sobelx)
     draw = cv.convertScaleAbs(sobelx, alpha=255.0/(maxVal - minVal), beta=-minVal * 255.0/(maxVal - minVal))
     cv.namedWindow('image', cv.WINDOW_AUTOSIZE)
     cv.imshow('image', draw)

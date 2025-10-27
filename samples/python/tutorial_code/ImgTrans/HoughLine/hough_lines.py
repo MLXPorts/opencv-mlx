@@ -5,7 +5,7 @@
 import sys
 import math
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 
 
 def main(argv):
@@ -30,11 +30,11 @@ def main(argv):
 
     # Copy edges to the images that will display the results in BGR
     cdst = cv.cvtColor(dst, cv.COLOR_GRAY2BGR)
-    cdstP = np.copy(cdst)
+    cdstP = mx.copy(cdst)
 
     ## [hough_lines]
     #  Standard Hough Line Transform
-    lines = cv.HoughLines(dst, 1, np.pi / 180, 150, None, 0, 0)
+    lines = cv.HoughLines(dst, 1, mx.pi / 180, 150, None, 0, 0)
     ## [hough_lines]
     ## [draw_lines]
     # Draw the lines
@@ -54,7 +54,7 @@ def main(argv):
 
     ## [hough_lines_p]
     # Probabilistic Line Transform
-    linesP = cv.HoughLinesP(dst, 1, np.pi / 180, 50, None, 50, 10)
+    linesP = cv.HoughLinesP(dst, 1, mx.pi / 180, 50, None, 50, 10)
     ## [hough_lines_p]
     ## [draw_lines_p]
     # Draw the lines

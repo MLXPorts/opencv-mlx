@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import os
 import sys
@@ -48,7 +48,7 @@ try:
 
         def test_image_input(self):
             sz = (1280, 720)
-            in_mat = np.random.randint(0, 100, sz).astype(np.uint8)
+            in_mat = mx.random.randint(0, 100, sz).astype(mx.uint8)
 
             # OpenCV
             expected = cv.medianBlur(in_mat, 3)
@@ -142,7 +142,7 @@ try:
 
         def test_video_add(self):
             sz = (576, 768, 3)
-            in_mat = np.random.randint(0, 100, sz).astype(np.uint8)
+            in_mat = mx.random.randint(0, 100, sz).astype(mx.uint8)
 
             path = self.find_file('cv/video/768x576.avi', [os.environ['OPENCV_TEST_DATA_PATH']])
 
@@ -230,7 +230,7 @@ try:
                     # OpenCV - (num_points, 1, 2)
                     # G-API  - (num_points, 2)
                     self.assertEqual(0.0, cv.norm(e.flatten(),
-                                                  np.array(a, np.float32).flatten(),
+                                                  mx.array(a, mx.float32).flatten(),
                                                   cv.NORM_INF))
 
                 proc_num_frames += 1
@@ -330,14 +330,14 @@ try:
         def test_compile_streaming_descr_of(self):
             g_in = cv.GMat()
             comp = cv.GComputation(g_in, cv.gapi.medianBlur(g_in, 3))
-            img = np.zeros((3,300,300), dtype=np.float32)
+            img = mx.zeros((3,300,300), dtype=mx.float32)
             comp.compileStreaming(cv.gapi.descr_of(img))
 
 
         def test_compile_streaming_descr_of_and_args(self):
             g_in = cv.GMat()
             comp = cv.GComputation(g_in, cv.gapi.medianBlur(g_in, 3))
-            img = np.zeros((3,300,300), dtype=np.float32)
+            img = mx.zeros((3,300,300), dtype=mx.float32)
             comp.compileStreaming(cv.gapi.descr_of(img),
                     cv.gapi.compile_args(cv.gapi.streaming.queue_capacity(1)))
 
@@ -345,14 +345,14 @@ try:
         def test_compile_streaming_meta(self):
             g_in = cv.GMat()
             comp = cv.GComputation(g_in, cv.gapi.medianBlur(g_in, 3))
-            img = np.zeros((3,300,300), dtype=np.float32)
+            img = mx.zeros((3,300,300), dtype=mx.float32)
             comp.compileStreaming([cv.GMatDesc(cv.CV_8U, 3, (300, 300))])
 
 
         def test_compile_streaming_meta_and_args(self):
             g_in = cv.GMat()
             comp = cv.GComputation(g_in, cv.gapi.medianBlur(g_in, 3))
-            img = np.zeros((3,300,300), dtype=np.float32)
+            img = mx.zeros((3,300,300), dtype=mx.float32)
             comp.compileStreaming([cv.GMatDesc(cv.CV_8U, 3, (300, 300))],
                     cv.gapi.compile_args(cv.gapi.streaming.queue_capacity(1)))
 
@@ -548,10 +548,10 @@ try:
                     if self.count >= 3:
                         return None
                     self.count += 1
-                    return np.ones((10, 10, 3), np.uint8) * self.count
+                    return mx.ones((10, 10, 3), mx.uint8) * self.count
 
                 def descr_of(self):
-                    return np.zeros((10, 10, 3), np.uint8)
+                    return mx.zeros((10, 10, 3), mx.uint8)
 
             g_in = cv.GMat()
             g_out = cv.gapi.copy(g_in)

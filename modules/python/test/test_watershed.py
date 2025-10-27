@@ -7,7 +7,7 @@ Watershed segmentation test
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 from tests_common import NewOpenCVTests
@@ -22,9 +22,9 @@ class watershed_test(NewOpenCVTests):
         if img is None or markers is None:
             self.assertEqual(0, 1, 'Missing test data')
 
-        colors = np.int32( list(np.ndindex(3, 3, 3)) ) * 122
-        cv.watershed(img, np.int32(markers))
-        segments = colors[np.maximum(markers, 0)]
+        colors = mx.int32( list(mx.ndindex(3, 3, 3)) ) * 122
+        cv.watershed(img, mx.int32(markers))
+        segments = colors[mx.maximum(markers, 0)]
 
         if refSegments is None:
             refSegments = segments.copy()

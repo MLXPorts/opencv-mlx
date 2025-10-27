@@ -32,7 +32,7 @@ Keys:
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 import re
@@ -66,15 +66,15 @@ class VideoSynthBase(object):
         w, h = self.frame_size
 
         if self.bg is None:
-            buf = np.zeros((h, w, 3), np.uint8)
+            buf = mx.zeros((h, w, 3), mx.uint8)
         else:
             buf = self.bg.copy()
 
         self.render(buf)
 
         if self.noise > 0.0:
-            noise = np.zeros((h, w, 3), np.int8)
-            cv.randn(noise, np.zeros(3), np.ones(3)*255*self.noise)
+            noise = mx.zeros((h, w, 3), mx.int8)
+            cv.randn(noise, mx.zeros(3), mx.ones(3)*255*self.noise)
             buf = cv.add(buf, noise, dtype=cv.CV_8UC3)
         return True, buf
 
@@ -89,8 +89,8 @@ class Book(VideoSynthBase):
         self.render = TestSceneRender(backGr, fgr, speed = 1)
 
     def read(self, dst=None):
-        noise = np.zeros(self.render.sceneBg.shape, np.int8)
-        cv.randn(noise, np.zeros(3), np.ones(3)*255*self.noise)
+        noise = mx.zeros(self.render.sceneBg.shape, mx.int8)
+        cv.randn(noise, mx.zeros(3), mx.ones(3)*255*self.noise)
 
         return True, cv.add(self.render.getNextFrame(), noise, dtype=cv.CV_8UC3)
 
@@ -100,8 +100,8 @@ class Cube(VideoSynthBase):
         self.render = TestSceneRender(cv.imread(cv.samples.findFile('pca_test1.jpg')), deformation = True,  speed = 1)
 
     def read(self, dst=None):
-        noise = np.zeros(self.render.sceneBg.shape, np.int8)
-        cv.randn(noise, np.zeros(3), np.ones(3)*255*self.noise)
+        noise = mx.zeros(self.render.sceneBg.shape, mx.int8)
+        cv.randn(noise, mx.zeros(3), mx.ones(3)*255*self.noise)
 
         return True, cv.add(self.render.getNextFrame(), noise, dtype=cv.CV_8UC3)
 
@@ -114,36 +114,36 @@ class Chess(VideoSynthBase):
         self.grid_size = sx, sy = 10, 7
         white_quads = []
         black_quads = []
-        for i, j in np.ndindex(sy, sx):
+        for i, j in mx.ndindex(sy, sx):
             q = [[j, i, 0], [j+1, i, 0], [j+1, i+1, 0], [j, i+1, 0]]
             [white_quads, black_quads][(i + j) % 2].append(q)
-        self.white_quads = np.float32(white_quads)
-        self.black_quads = np.float32(black_quads)
+        self.white_quads = mx.float32(white_quads)
+        self.black_quads = mx.float32(black_quads)
 
         fx = 0.9
-        self.K = np.float64([[fx*w, 0, 0.5*(w-1)],
+        self.K = mx.float64([[fx*w, 0, 0.5*(w-1)],
                         [0, fx*w, 0.5*(h-1)],
                         [0.0,0.0,      1.0]])
 
-        self.dist_coef = np.float64([-0.2, 0.1, 0, 0])
+        self.dist_coef = mx.float64([-0.2, 0.1, 0, 0])
         self.t = 0
 
     def draw_quads(self, img, quads, color = (0, 255, 0)):
         img_quads = cv.projectPoints(quads.reshape(-1, 3), self.rvec, self.tvec, self.K, self.dist_coef) [0]
         img_quads.shape = quads.shape[:2] + (2,)
         for q in img_quads:
-            cv.fillConvexPoly(img, np.int32(q*4), color, cv.LINE_AA, shift=2)
+            cv.fillConvexPoly(img, mx.int32(q*4), color, cv.LINE_AA, shift=2)
 
     def render(self, dst):
         t = self.t
         self.t += 1.0/30.0
 
         sx, sy = self.grid_size
-        center = np.array([0.5*sx, 0.5*sy, 0.0])
+        center = mx.array([0.5*sx, 0.5*sy, 0.0])
         phi = pi/3 + sin(t*3)*pi/8
         c, s = cos(phi), sin(phi)
-        ofs = np.array([sin(1.2*t), cos(1.8*t), 0]) * sx * 0.2
-        eye_pos = center + np.array([cos(t)*c, sin(t)*c, s]) * 15.0 + ofs
+        ofs = mx.array([sin(1.2*t), cos(1.8*t), 0]) * sx * 0.2
+        eye_pos = center + mx.array([cos(t)*c, sin(t)*c, s]) * 15.0 + ofs
         target_pos = center + ofs
 
         R, self.tvec = common.lookat(eye_pos, target_pos)

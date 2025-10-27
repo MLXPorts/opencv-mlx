@@ -2,11 +2,11 @@ import paddle
 import paddlehub as hub
 import paddlehub.vision.transforms as T
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 
 
 def preprocess(image_path):
-    ''' preprocess input image file to np.ndarray
+    ''' preprocess input image file to mx.ndarray
 
     Args:
         image_path(str): Path of input image file
@@ -21,7 +21,7 @@ def preprocess(image_path):
         T.Normalize(mean=[0.485, 0.456, 0.406],
                     std=[0.229, 0.224, 0.225])],
         to_rgb=True)
-    return np.expand_dims(transforms(image_path), axis=0)
+    return mx.expand_dims(transforms(image_path), axis=0)
 
 
 def export_onnx_resnet50(save_path):
@@ -55,7 +55,7 @@ if __name__ == '__main__':
     net.setInput(im)
     result = net.forward(['save_infer_model/scale_0.tmp_0'])
     # post process
-    class_id = np.argmax(result[0])
+    class_id = mx.argmax(result[0])
     label = labels[class_id]
     print("Image: {}".format(image_file))
     print("Predict Category: {}".format(label))

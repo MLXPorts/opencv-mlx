@@ -11,7 +11,7 @@ Usage:
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 import sys
@@ -27,10 +27,10 @@ def main():
     img = cv.medianBlur(img, 5)
     cimg = src.copy() # numpy function
 
-    circles = cv.HoughCircles(img, cv.HOUGH_GRADIENT, 1, 10, np.array([]), 200, 30, 5, 30)
+    circles = cv.HoughCircles(img, cv.HOUGH_GRADIENT, 1, 10, mx.array([]), 200, 30, 5, 30)
 
     if circles is not None: # Check if circles have been found and only then iterate over these and add them to the image
-        circles = np.uint16(np.around(circles))
+        circles = mx.uint16(mx.around(circles))
         _a, b, _c = circles.shape
         for i in range(b):
             cv.circle(cimg, (circles[0][i][0], circles[0][i][1]), circles[0][i][2], (0, 0, 255), 3, cv.LINE_AA)

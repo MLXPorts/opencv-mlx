@@ -1,6 +1,6 @@
 import sys
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 
 #  Global Variables
 
@@ -30,7 +30,7 @@ def main(argv):
         return 0
 
     global dst
-    dst = np.copy(src)
+    dst = mx.copy(src)
     if display_dst(DELAY_CAPTION) != 0:
         return 0
 
@@ -87,7 +87,7 @@ def main(argv):
 
 def display_caption(caption):
     global dst
-    dst = np.zeros(src.shape, src.dtype)
+    dst = mx.zeros(src.shape, src.dtype)
     rows, cols, _ch = src.shape
     cv.putText(dst, caption,
                 (int(cols / 4), int(rows / 2)),

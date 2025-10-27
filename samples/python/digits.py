@@ -27,13 +27,13 @@ Usage:
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 # built-in modules
 from multiprocessing.pool import ThreadPool
 
-from numpy.linalg import norm
+from mlx.core import norm
 
 # local modules
 from common import clock, mosaic
@@ -47,8 +47,8 @@ DIGITS_FN = 'digits.png'
 def split2d(img, cell_size, flatten=True):
     h, w = img.shape[:2]
     sx, sy = cell_size
-    cells = [np.hsplit(row, w//sx) for row in np.vsplit(img, h//sy)]
-    cells = np.array(cells)
+    cells = [mx.hsplit(row, w//sx) for row in mx.vsplit(img, h//sy)]
+    cells = mx.array(cells)
     if flatten:
         cells = cells.reshape(-1, sy, sx)
     return cells
@@ -58,7 +58,7 @@ def load_digits(fn):
     print('loading "%s" ...' % fn)
     digits_img = cv.imread(fn, cv.IMREAD_GRAYSCALE)
     digits = split2d(digits_img, (SZ, SZ))
-    labels = np.repeat(np.arange(CLASS_N), len(digits)/CLASS_N)
+    labels = mx.repeat(mx.arange(CLASS_N), len(digits)/CLASS_N)
     return digits, labels
 
 def deskew(img):
@@ -66,7 +66,7 @@ def deskew(img):
     if abs(m['mu02']) < 1e-2:
         return img.copy()
     skew = m['mu11']/m['mu02']
-    M = np.float32([[1, skew, -0.5*SZ*skew], [0, 1, 0]])
+    M = mx.float32([[1, skew, -0.5*SZ*skew], [0, 1, 0]])
     img = cv.warpAffine(img, M, (SZ, SZ), flags=cv.WARP_INVERSE_MAP | cv.INTER_LINEAR)
     return img
 
@@ -114,7 +114,7 @@ def evaluate_model(model, digits, samples, labels):
     err = (labels != resp).mean()
     print('error: %.2f %%' % (err*100))
 
-    confusion = np.zeros((10, 10), np.int32)
+    confusion = mx.zeros((10, 10), mx.int32)
     for i, j in zip(labels, resp):
         confusion[i, int(j)] += 1
     print('confusion matrix:')
@@ -130,7 +130,7 @@ def evaluate_model(model, digits, samples, labels):
     return mosaic(25, vis)
 
 def preprocess_simple(digits):
-    return np.float32(digits).reshape(-1, SZ*SZ) / 255.0
+    return mx.float32(digits).reshape(-1, SZ*SZ) / 255.0
 
 def preprocess_hog(digits):
     samples = []
@@ -139,20 +139,20 @@ def preprocess_hog(digits):
         gy = cv.Sobel(img, cv.CV_32F, 0, 1)
         mag, ang = cv.cartToPolar(gx, gy)
         bin_n = 16
-        bin = np.int32(bin_n*ang/(2*np.pi))
+        bin = mx.int32(bin_n*ang/(2*mx.pi))
         bin_cells = bin[:10,:10], bin[10:,:10], bin[:10,10:], bin[10:,10:]
         mag_cells = mag[:10,:10], mag[10:,:10], mag[:10,10:], mag[10:,10:]
-        hists = [np.bincount(b.ravel(), m.ravel(), bin_n) for b, m in zip(bin_cells, mag_cells)]
-        hist = np.hstack(hists)
+        hists = [mx.bincount(b.ravel(), m.ravel(), bin_n) for b, m in zip(bin_cells, mag_cells)]
+        hist = mx.hstack(hists)
 
         # transform to Hellinger kernel
         eps = 1e-7
         hist /= hist.sum() + eps
-        hist = np.sqrt(hist)
+        hist = mx.sqrt(hist)
         hist /= norm(hist) + eps
 
         samples.append(hist)
-    return np.float32(samples)
+    return mx.float32(samples)
 
 
 if __name__ == '__main__':
@@ -162,7 +162,7 @@ if __name__ == '__main__':
 
     print('preprocessing...')
     # shuffle digits
-    rand = np.random.RandomState(321)
+    rand = mx.random.RandomState(321)
     shuffle = rand.permutation(len(digits))
     digits, labels = digits[shuffle], labels[shuffle]
 
@@ -171,9 +171,9 @@ if __name__ == '__main__':
 
     train_n = int(0.9*len(samples))
     cv.imshow('test set', mosaic(25, digits[train_n:]))
-    digits_train, digits_test = np.split(digits2, [train_n])
-    samples_train, samples_test = np.split(samples, [train_n])
-    labels_train, labels_test = np.split(labels, [train_n])
+    digits_train, digits_test = mx.split(digits2, [train_n])
+    samples_train, samples_test = mx.split(samples, [train_n])
+    labels_train, labels_test = mx.split(labels, [train_n])
 
 
     print('training KNearest...')

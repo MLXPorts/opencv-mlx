@@ -1,6 +1,6 @@
 from __future__ import print_function
 from abc import ABCMeta, abstractmethod
-import numpy as np
+import mlx.core as mx
 import sys
 import argparse
 import time
@@ -14,42 +14,42 @@ except ImportError:
 
 
 def get_metrics(conf_mat):
-    pix_accuracy = np.trace(conf_mat) / np.sum(conf_mat)
-    t = np.sum(conf_mat, 1)
-    num_cl = np.count_nonzero(t)
+    pix_accuracy = mx.trace(conf_mat) / mx.sum(conf_mat)
+    t = mx.sum(conf_mat, 1)
+    num_cl = mx.count_nonzero(t)
     assert num_cl
-    mean_accuracy = np.sum(np.nan_to_num(np.divide(np.diagonal(conf_mat), t))) / num_cl
-    col_sum = np.sum(conf_mat, 0)
-    mean_iou = np.sum(
-        np.nan_to_num(np.divide(np.diagonal(conf_mat), (t + col_sum - np.diagonal(conf_mat))))) / num_cl
+    mean_accuracy = mx.sum(mx.nan_to_num(mx.divide(mx.diagonal(conf_mat), t))) / num_cl
+    col_sum = mx.sum(conf_mat, 0)
+    mean_iou = mx.sum(
+        mx.nan_to_num(mx.divide(mx.diagonal(conf_mat), (t + col_sum - mx.diagonal(conf_mat))))) / num_cl
     return pix_accuracy, mean_accuracy, mean_iou
 
 
 def eval_segm_result(net_out):
-    assert type(net_out) is np.ndarray
+    assert type(net_out) is mx.ndarray
     assert len(net_out.shape) == 4
 
     channels_dim = 1
     y_dim = channels_dim + 1
     x_dim = y_dim + 1
-    res = np.zeros(net_out.shape).astype(int)
+    res = mx.zeros(net_out.shape).astype(int)
     for i in range(net_out.shape[y_dim]):
         for j in range(net_out.shape[x_dim]):
-            max_ch = np.argmax(net_out[..., i, j])
+            max_ch = mx.argmax(net_out[..., i, j])
             res[0, max_ch, i, j] = 1
     return res
 
 
 def get_conf_mat(gt, prob):
-    assert type(gt) is np.ndarray
-    assert type(prob) is np.ndarray
+    assert type(gt) is mx.ndarray
+    assert type(prob) is mx.ndarray
 
-    conf_mat = np.zeros((gt.shape[0], gt.shape[0]))
+    conf_mat = mx.zeros((gt.shape[0], gt.shape[0]))
     for ch_gt in range(conf_mat.shape[0]):
         gt_channel = gt[ch_gt, ...]
         for ch_pr in range(conf_mat.shape[1]):
             prob_channel = prob[ch_pr, ...]
-            conf_mat[ch_gt][ch_pr] = np.count_nonzero(np.multiply(gt_channel, prob_channel))
+            conf_mat[ch_gt][ch_pr] = mx.count_nonzero(mx.multiply(gt_channel, prob_channel))
     return conf_mat
 
 
@@ -88,7 +88,7 @@ class DatasetImageFetch(object):
     @staticmethod
     def color_to_gt(color_img, colors):
         num_classes = len(colors)
-        gt = np.zeros((num_classes, color_img.shape[0], color_img.shape[1])).astype(int)
+        gt = mx.zeros((num_classes, color_img.shape[0], color_img.shape[1])).astype(int)
         for img_y in range(color_img.shape[0]):
             for img_x in range(color_img.shape[1]):
                 c = DatasetImageFetch.pix_to_c(color_img[img_y][img_x])
@@ -158,7 +158,7 @@ class SemSegmEvaluation:
     def process(self, frameworks, data_fetcher):
         samples_handled = 0
 
-        conf_mats = [np.zeros((data_fetcher.get_num_classes(), data_fetcher.get_num_classes())) for i in range(len(frameworks))]
+        conf_mats = [mx.zeros((data_fetcher.get_num_classes(), data_fetcher.get_num_classes())) for i in range(len(frameworks))]
         blobs_l1_diff = [0] * len(frameworks)
         blobs_l1_diff_count = [0] * len(frameworks)
         blobs_l_inf_diff = [sys.float_info.min] * len(frameworks)
@@ -188,13 +188,13 @@ class SemSegmEvaluation:
 
             for i in range(1, len(frameworks)):
                 log_str = frameworks[0].get_name() + " vs " + frameworks[i].get_name() + ':'
-                diff = np.abs(frameworks_out[0] - frameworks_out[i])
-                l1_diff = np.sum(diff) / diff.size
+                diff = mx.abs(frameworks_out[0] - frameworks_out[i])
+                l1_diff = mx.sum(diff) / diff.size
                 print(samples_handled, "L1 difference", log_str, l1_diff, file=self.log)
                 blobs_l1_diff[i] += l1_diff
                 blobs_l1_diff_count[i] += 1
-                if np.max(diff) > blobs_l_inf_diff[i]:
-                    blobs_l_inf_diff[i] = np.max(diff)
+                if mx.max(diff) > blobs_l_inf_diff[i]:
+                    blobs_l_inf_diff[i] = mx.max(diff)
                 print(samples_handled, "L_INF difference", log_str, blobs_l_inf_diff[i], file=self.log)
 
             self.log.flush()

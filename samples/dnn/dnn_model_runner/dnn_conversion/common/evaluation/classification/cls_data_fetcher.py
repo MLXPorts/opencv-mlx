@@ -2,7 +2,7 @@ import os
 from abc import ABCMeta, abstractmethod
 
 import cv2
-import numpy as np
+import mlx.core as mx
 
 from ...img_utils import read_rgb_img, get_pytorch_preprocess
 from ...test.configs.default_preprocess_config import PYTORCH_RSZ_HEIGHT, PYTORCH_RSZ_WIDTH
@@ -22,7 +22,7 @@ class DataFetch(object):
     @staticmethod
     def reshape_img(img):
         img = img[:, :, 0:3].transpose(2, 0, 1)
-        return np.expand_dims(img, 0)
+        return mx.expand_dims(img, 0)
 
     def center_crop(self, img):
         cols = img.shape[1]
@@ -49,7 +49,7 @@ class DataFetch(object):
 
     def get_batch(self, img_names):
         assert type(img_names) is list
-        batch = np.zeros((len(img_names), 3, self.frame_size, self.frame_size)).astype(np.float32)
+        batch = mx.zeros((len(img_names), 3, self.frame_size, self.frame_size)).astype(mx.float32)
 
         for i in range(len(img_names)):
             img_name = img_names[i]

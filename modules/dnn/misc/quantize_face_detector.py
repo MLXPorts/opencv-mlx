@@ -3,7 +3,7 @@ import sys
 import argparse
 import cv2 as cv
 import tensorflow as tf
-import numpy as np
+import mlx.core as mx
 import struct
 
 if sys.version_info > (3,):
@@ -86,8 +86,8 @@ def batch_norm(x, name):
 
         mean = tf.Variable(mean, dtype=tf.float32, name='mean')
         std = tf.Variable(std, dtype=tf.float32, name='std')
-        gamma = tf.Variable(scale if hasWeights else np.ones(mean.shape), dtype=tf.float32, name='gamma')
-        beta = tf.Variable(layer.blobs[3].flatten() if hasBias else np.zeros(mean.shape), dtype=tf.float32, name='beta')
+        gamma = tf.Variable(scale if hasWeights else mx.ones(mean.shape), dtype=tf.float32, name='gamma')
+        beta = tf.Variable(layer.blobs[3].flatten() if hasBias else mx.zeros(mean.shape), dtype=tf.float32, name='beta')
         bn = tf.nn.fused_batch_norm(x, gamma, beta, mean, std, eps,
                                     is_training=False)[0]
         if bn.dtype != dtype:
@@ -194,7 +194,7 @@ for top, suffix in zip([locations, confidences], ['_mbox_loc', '_mbox_conf']):
 mbox_loc = tf.concat(locations, axis=-1, name='mbox_loc')
 mbox_conf = tf.concat(confidences, axis=-1, name='mbox_conf')
 
-total = int(np.prod(mbox_conf.shape[1:]))
+total = int(mx.prod(mbox_conf.shape[1:]))
 mbox_conf_reshape = tf.reshape(mbox_conf, [-1, 2], name='mbox_conf_reshape')
 mbox_conf_softmax = tf.nn.softmax(mbox_conf_reshape, name='mbox_conf_softmax')
 mbox_conf_flatten = tf.reshape(mbox_conf_softmax, [-1, total], name='mbox_conf_flatten')
@@ -207,16 +207,16 @@ with tf.Session() as sess:
     out_nodes = ['mbox_loc', 'mbox_conf_flatten']
     inp_nodes = [inp.name[:inp.name.find(':')]]
 
-    np.random.seed(2701)
-    inputData = np.random.standard_normal([1, 3, 300, 300]).astype(np.float32)
+    mx.random.seed(2701)
+    inputData = mx.random.standard_normal([1, 3, 300, 300]).astype(mx.float32)
 
     cvNet.setInput(inputData)
     cvNet.setPreferableBackend(cv.dnn.DNN_BACKEND_OPENCV)
     outDNN = cvNet.forward(out_nodes)
 
     outTF = sess.run([mbox_loc, mbox_conf_flatten], feed_dict={inp: inputData.transpose(0, 2, 3, 1)})
-    print('Max diff @ locations:  %e' % np.max(np.abs(outDNN[0] - outTF[0])))
-    print('Max diff @ confidence: %e' % np.max(np.abs(outDNN[1] - outTF[1])))
+    print('Max diff @ locations:  %e' % mx.max(mx.abs(outDNN[0] - outTF[0])))
+    print('Max diff @ confidence: %e' % mx.max(mx.abs(outDNN[1] - outTF[1])))
 
     # Save a graph
     graph_def = sess.graph.as_graph_def()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import os
 import sys
@@ -104,7 +104,7 @@ try:
 
             ref = AgeGenderOV(model_path, bin_path, device_id)
             ref.cfgPrePostProcessing(preproc)
-            ov_age, ov_gender = ref.apply(np.expand_dims(img, 0))
+            ov_age, ov_gender = ref.apply(mx.expand_dims(img, 0))
 
             # OpenCV G-API (No preproc required)
             comp = AgeGenderGAPI(model_path, bin_path, device_id)
@@ -127,9 +127,9 @@ try:
             img = cv.imread(img_path)
 
             # Prepare data manually
-            tensor = cv.resize(img, (62, 62)).astype(np.float32)
-            tensor = np.transpose(tensor, (2, 0, 1))
-            tensor = np.expand_dims(tensor, 0)
+            tensor = cv.resize(img, (62, 62)).astype(mx.float32)
+            tensor = mx.transpose(tensor, (2, 0, 1))
+            tensor = mx.expand_dims(tensor, 0)
 
             # OpenVINO (No preproce required)
             ref = AgeGenderOV(model_path, bin_path, device_id)
@@ -157,7 +157,7 @@ try:
             img1 = cv.imread(img_path1)
             img2 = cv.imread(img_path2)
             # img1 and img2 have the same size
-            batch_img = np.array([img1, img2])
+            batch_img = mx.array([img1, img2])
 
             # OpenVINO
             def preproc(ppp):
@@ -196,8 +196,8 @@ try:
 
             img_path = self.find_file('cv/face/david2.jpg', [os.environ.get('OPENCV_TEST_DATA_PATH')])
             img = cv.imread(img_path)
-            planar_img = np.transpose(img, (2, 0, 1))
-            planar_img = np.expand_dims(planar_img, 0)
+            planar_img = mx.transpose(img, (2, 0, 1))
+            planar_img = mx.expand_dims(planar_img, 0)
 
             # OpenVINO
             def preproc(ppp):

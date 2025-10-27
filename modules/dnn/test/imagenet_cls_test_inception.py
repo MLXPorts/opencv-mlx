@@ -1,4 +1,4 @@
-import numpy as np
+import mlx.core as mx
 import sys
 import os
 import argparse

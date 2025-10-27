@@ -8,7 +8,7 @@ Test for imread
 from __future__ import print_function
 
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import sys
 
 from tests_common import NewOpenCVTests
@@ -18,7 +18,7 @@ class imread_test(NewOpenCVTests):
         path = self.extraTestDataPath + '/cv/shared/lena.png'
         ref = cv.imread(path)
 
-        img = np.zeros_like(ref)
+        img = mx.zeros_like(ref)
         cv.imread(path, img)
         self.assertEqual(cv.norm(ref, img, cv.NORM_INF), 0.0)
 

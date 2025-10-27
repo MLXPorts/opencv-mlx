@@ -30,8 +30,8 @@ from multiprocessing.pool import ThreadPool
 
 import cv2 as cv
 
-import numpy as np
-from numpy.linalg import norm
+import mlx.core as mx
+from mlx.core import norm
 
 
 SZ = 20 # size of each digit is SZ x SZ
@@ -41,8 +41,8 @@ DIGITS_FN = 'samples/data/digits.png'
 def split2d(img, cell_size, flatten=True):
     h, w = img.shape[:2]
     sx, sy = cell_size
-    cells = [np.hsplit(row, w//sx) for row in np.vsplit(img, h//sy)]
-    cells = np.array(cells)
+    cells = [mx.hsplit(row, w//sx) for row in mx.vsplit(img, h//sy)]
+    cells = mx.array(cells)
     if flatten:
         cells = cells.reshape(-1, sy, sx)
     return cells
@@ -52,7 +52,7 @@ def deskew(img):
     if abs(m['mu02']) < 1e-2:
         return img.copy()
     skew = m['mu11']/m['mu02']
-    M = np.float32([[1, skew, -0.5*SZ*skew], [0, 1, 0]])
+    M = mx.float32([[1, skew, -0.5*SZ*skew], [0, 1, 0]])
     img = cv.warpAffine(img, M, (SZ, SZ), flags=cv.WARP_INVERSE_MAP | cv.INTER_LINEAR)
     return img
 
@@ -93,14 +93,14 @@ def evaluate_model(model, digits, samples, labels):
     resp = model.predict(samples)
     err = (labels != resp).mean()
 
-    confusion = np.zeros((10, 10), np.int32)
+    confusion = mx.zeros((10, 10), mx.int32)
     for i, j in zip(labels, resp):
         confusion[int(i), int(j)] += 1
 
     return err, confusion
 
 def preprocess_simple(digits):
-    return np.float32(digits).reshape(-1, SZ*SZ) / 255.0
+    return mx.float32(digits).reshape(-1, SZ*SZ) / 255.0
 
 def preprocess_hog(digits):
     samples = []
@@ -109,20 +109,20 @@ def preprocess_hog(digits):
         gy = cv.Sobel(img, cv.CV_32F, 0, 1)
         mag, ang = cv.cartToPolar(gx, gy)
         bin_n = 16
-        bin = np.int32(bin_n*ang/(2*np.pi))
+        bin = mx.int32(bin_n*ang/(2*mx.pi))
         bin_cells = bin[:10,:10], bin[10:,:10], bin[:10,10:], bin[10:,10:]
         mag_cells = mag[:10,:10], mag[10:,:10], mag[:10,10:], mag[10:,10:]
-        hists = [np.bincount(b.ravel(), m.ravel(), bin_n) for b, m in zip(bin_cells, mag_cells)]
-        hist = np.hstack(hists)
+        hists = [mx.bincount(b.ravel(), m.ravel(), bin_n) for b, m in zip(bin_cells, mag_cells)]
+        hist = mx.hstack(hists)
 
         # transform to Hellinger kernel
         eps = 1e-7
         hist /= hist.sum() + eps
-        hist = np.sqrt(hist)
+        hist = mx.sqrt(hist)
         hist /= norm(hist) + eps
 
         samples.append(hist)
-    return np.float32(samples)
+    return mx.float32(samples)
 
 from tests_common import NewOpenCVTests
 
@@ -131,7 +131,7 @@ class digits_test(NewOpenCVTests):
     def load_digits(self, fn):
         digits_img = self.get_sample(fn, 0)
         digits = split2d(digits_img, (SZ, SZ))
-        labels = np.repeat(np.arange(CLASS_N), len(digits)/CLASS_N)
+        labels = mx.repeat(mx.arange(CLASS_N), len(digits)/CLASS_N)
         return digits, labels
 
     def test_digits(self):
@@ -139,7 +139,7 @@ class digits_test(NewOpenCVTests):
         digits, labels = self.load_digits(DIGITS_FN)
 
         # shuffle digits
-        rand = np.random.RandomState(321)
+        rand = mx.random.RandomState(321)
         shuffle = rand.permutation(len(digits))
         digits, labels = digits[shuffle], labels[shuffle]
 
@@ -147,9 +147,9 @@ class digits_test(NewOpenCVTests):
         samples = preprocess_hog(digits2)
 
         train_n = int(0.9*len(samples))
-        _digits_train, digits_test = np.split(digits2, [train_n])
-        samples_train, samples_test = np.split(samples, [train_n])
-        labels_train, labels_test = np.split(labels, [train_n])
+        _digits_train, digits_test = mx.split(digits2, [train_n])
+        samples_train, samples_test = mx.split(samples, [train_n])
+        labels_train, labels_test = mx.split(labels, [train_n])
         errors = list()
         confusionMatrixes = list()
 

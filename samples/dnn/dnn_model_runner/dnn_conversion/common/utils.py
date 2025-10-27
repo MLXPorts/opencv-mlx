@@ -4,7 +4,7 @@ import os
 import random
 
 import matplotlib.pyplot as plt
-import numpy as np
+import mlx.core as mx
 import tensorflow as tf
 import torch
 
@@ -37,24 +37,24 @@ def plot_acc(data_list, experiment_name):
 
 
 def get_final_summary_info(general_quality_metric, general_inference_time, metric_name):
-    general_quality_metric = np.array(general_quality_metric)
-    general_inference_time = np.array(general_inference_time)
+    general_quality_metric = mx.array(general_quality_metric)
+    general_inference_time = mx.array(general_inference_time)
     summary_line = "===== End of processing. General results:\n"
     "\t* mean {} for the original model: {}\t"
     "\t* mean time (min) for the original model inferences: {}\n"
     "\t* mean {} for the DNN model: {}\t"
     "\t* mean time (min) for the DNN model inferences: {}\n".format(
-        metric_name, np.mean(general_quality_metric[:, 0]),
-        np.mean(general_inference_time[:, 0]) / 60000,
-        metric_name, np.mean(general_quality_metric[:, 1]),
-        np.mean(general_inference_time[:, 1]) / 60000,
+        metric_name, mx.mean(general_quality_metric[:, 0]),
+        mx.mean(general_inference_time[:, 0]) / 60000,
+        metric_name, mx.mean(general_quality_metric[:, 1]),
+        mx.mean(general_inference_time[:, 1]) / 60000,
     )
     return summary_line
 
 
 def set_common_reproducibility():
     random.seed(SEED_VAL)
-    np.random.seed(SEED_VAL)
+    mx.random.seed(SEED_VAL)
 
 
 def set_pytorch_env():

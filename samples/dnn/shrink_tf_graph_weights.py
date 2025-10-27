@@ -7,7 +7,7 @@
 import tensorflow as tf
 import struct
 import argparse
-import numpy as np
+import mlx.core as mx
 
 parser = argparse.ArgumentParser(description='Convert weights of a frozen TensorFlow graph to fp16.')
 parser.add_argument('--input', required=True, help='Path to frozen graph.')
@@ -56,7 +56,7 @@ for node in graph_def.node:
         floats = node.attr['value'].tensor.tensor_content
 
         floats = struct.unpack('f' * (len(floats) / 4), floats)
-        halfs = np.array(floats).astype(np.float16).view(np.uint16)
+        halfs = mx.array(floats).astype(mx.float16).view(mx.uint16)
         node.attr['value'].tensor.tensor_content = struct.pack('H' * len(halfs), *halfs)
 
 tf.train.write_graph(graph_def, "", args.output, as_text=False)

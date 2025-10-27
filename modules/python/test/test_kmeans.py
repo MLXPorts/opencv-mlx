@@ -7,7 +7,7 @@ K-means clusterization test
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 from numpy import random
 import sys
@@ -24,13 +24,13 @@ def make_gaussians(cluster_n, img_size):
     for _ in xrange(cluster_n):
         mean = (0.1 + 0.8*random.rand(2)) * img_size
         a = (random.rand(2, 2)-0.5)*img_size*0.1
-        cov = np.dot(a.T, a) + img_size*0.05*np.eye(2)
+        cov = mx.dot(a.T, a) + img_size*0.05*mx.eye(2)
         n = 100 + random.randint(900)
         pts = random.multivariate_normal(mean, cov, n)
         points.append( pts )
         ref_distrs.append( (mean, cov) )
         sizes.append(n)
-    points = np.float32( np.vstack(points) )
+    points = mx.float32( mx.vstack(points) )
     return points, ref_distrs, sizes
 
 def getMainLabelConfidence(labels, nLabels):
@@ -51,7 +51,7 @@ class kmeans_test(NewOpenCVTests):
 
     def test_kmeans(self):
 
-        np.random.seed(10)
+        mx.random.seed(10)
 
         cluster_n = 5
         img_size = 512

@@ -12,7 +12,7 @@ between frames.
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 #local modules
@@ -34,10 +34,10 @@ def getRectFromPoints(points):
     for point in points:
         distances.append(cv.norm(point, cv.NORM_L2))
 
-    x0, y0 = points[np.argmin(distances)]
-    x1, y1 = points[np.argmax(distances)]
+    x0, y0 = points[mx.argmin(distances)]
+    x1, y1 = points[mx.argmax(distances)]
 
-    return np.array([x0, y0, x1, y1])
+    return mx.array([x0, y0, x1, y1])
 
 
 class lk_track_test(NewOpenCVTests):
@@ -62,7 +62,7 @@ class lk_track_test(NewOpenCVTests):
 
             if len(self.tracks) > 0:
                 img0, img1 = self.prev_gray, frame_gray
-                p0 = np.float32([tr[-1][0] for tr in self.tracks]).reshape(-1, 1, 2)
+                p0 = mx.float32([tr[-1][0] for tr in self.tracks]).reshape(-1, 1, 2)
                 p1, _st, _err = cv.calcOpticalFlowPyrLK(img0, img1, p0, None, **lk_params)
                 p0r, _st, _err = cv.calcOpticalFlowPyrLK(img1, img0, p1, None, **lk_params)
                 d = abs(p0-p0r).reshape(-1, 2).max(-1)
@@ -95,13 +95,13 @@ class lk_track_test(NewOpenCVTests):
                     self.assertGreater(fgIndex, 0.9)
                     self.assertGreater(fgRate, 0.2)
 
-                mask = np.zeros_like(frame_gray)
+                mask = mx.zeros_like(frame_gray)
                 mask[:] = 255
-                for x, y in [np.int32(tr[-1][0]) for tr in self.tracks]:
+                for x, y in [mx.int32(tr[-1][0]) for tr in self.tracks]:
                     cv.circle(mask, (x, y), 5, 0, -1)
                 p = cv.goodFeaturesToTrack(frame_gray, mask = mask, **feature_params)
                 if p is not None:
-                    for x, y in np.float32(p).reshape(-1, 2):
+                    for x, y in mx.float32(p).reshape(-1, 2):
                         self.tracks.append([[(x, y), self.frame_idx]])
 
             self.frame_idx += 1

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import os
 import sys
@@ -28,8 +28,8 @@ try:
         def test_add(self):
             # TODO: Extend to use any type and size here
             sz = (720, 1280)
-            in1 = np.full(sz, 100)
-            in2 = np.full(sz, 50)
+            in1 = mx.full(sz, 100)
+            in2 = mx.full(sz, 50)
 
             # OpenCV
             expected = cv.add(in1, in2)
@@ -50,8 +50,8 @@ try:
 
         def test_add_uint8(self):
             sz = (720, 1280)
-            in1 = np.full(sz, 100, dtype=np.uint8)
-            in2 = np.full(sz, 50 , dtype=np.uint8)
+            in1 = mx.full(sz, 100, dtype=mx.uint8)
+            in2 = mx.full(sz, 50 , dtype=mx.uint8)
 
             # OpenCV
             expected = cv.add(in1, in2)
@@ -139,7 +139,7 @@ try:
             # K-means params
             count    = 100
             sz       = (count, 2)
-            in_mat   = np.random.random(sz).astype(np.float32)
+            in_mat   = mx.random.random(sz).astype(mx.float32)
             K        = 5
             flags    = cv.KMEANS_RANDOM_CENTERS
             attempts = 1
@@ -163,7 +163,7 @@ try:
 
 
         def generate_random_points(self, sz):
-            arr = np.random.random(sz).astype(np.float32).T
+            arr = mx.random.random(sz).astype(mx.float32).T
             return list(zip(*[arr[i] for i in range(sz[1])]))
 
 

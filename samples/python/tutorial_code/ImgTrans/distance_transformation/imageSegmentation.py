@@ -1,6 +1,6 @@
 from __future__ import print_function
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 import random as rng
 
@@ -26,7 +26,7 @@ cv.imshow('Source Image', src)
 ## [black_bg]
 # Change the background from white to black, since that will help later to extract
 # better results during the use of Distance Transform
-src[np.all(src == 255, axis=2)] = 0
+src[mx.all(src == 255, axis=2)] = 0
 
 # Show output image
 cv.imshow('Black Background Image', src)
@@ -35,7 +35,7 @@ cv.imshow('Black Background Image', src)
 ## [sharp]
 # Create a kernel that we will use to sharpen our image
 # an approximation of second derivative, a quite strong kernel
-kernel = np.array([[1, 1, 1], [1, -8, 1], [1, 1, 1]], dtype=np.float32)
+kernel = mx.array([[1, 1, 1], [1, -8, 1], [1, 1, 1]], dtype=mx.float32)
 
 # do the laplacian filtering as it is
 # well, we need to convert everything in something more deeper then CV_8U
@@ -44,14 +44,14 @@ kernel = np.array([[1, 1, 1], [1, -8, 1], [1, 1, 1]], dtype=np.float32)
 # BUT a 8bits unsigned int (the one we are working with) can contain values from 0 to 255
 # so the possible negative number will be truncated
 imgLaplacian = cv.filter2D(src, cv.CV_32F, kernel)
-sharp = np.float32(src)
+sharp = mx.float32(src)
 imgResult = sharp - imgLaplacian
 
 # convert back to 8bits gray scale
-imgResult = np.clip(imgResult, 0, 255)
+imgResult = mx.clip(imgResult, 0, 255)
 imgResult = imgResult.astype('uint8')
-imgLaplacian = np.clip(imgLaplacian, 0, 255)
-imgLaplacian = np.uint8(imgLaplacian)
+imgLaplacian = mx.clip(imgLaplacian, 0, 255)
+imgLaplacian = mx.uint8(imgLaplacian)
 
 #cv.imshow('Laplace Filtered Image', imgLaplacian)
 cv.imshow('New Sharped Image', imgResult)
@@ -80,7 +80,7 @@ cv.imshow('Distance Transform Image', dist)
 _, dist = cv.threshold(dist, 0.4, 1.0, cv.THRESH_BINARY)
 
 # Dilate a bit the dist image
-kernel1 = np.ones((3,3), dtype=np.uint8)
+kernel1 = mx.ones((3,3), dtype=mx.uint8)
 dist = cv.dilate(dist, kernel1)
 cv.imshow('Peaks', dist)
 ## [peaks]
@@ -94,7 +94,7 @@ dist_8u = dist.astype('uint8')
 contours, _ = cv.findContours(dist_8u, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
 # Create the marker image for the watershed algorithm
-markers = np.zeros(dist.shape, dtype=np.int32)
+markers = mx.zeros(dist.shape, dtype=mx.int32)
 
 # Draw the foreground markers
 for i in range(len(contours)):
@@ -110,7 +110,7 @@ cv.imshow('Markers', markers_8u)
 # Perform the watershed algorithm
 cv.watershed(imgResult, markers)
 
-#mark = np.zeros(markers.shape, dtype=np.uint8)
+#mark = mx.zeros(markers.shape, dtype=mx.uint8)
 mark = markers.astype('uint8')
 mark = cv.bitwise_not(mark)
 # uncomment this if you want to see how the mark
@@ -123,7 +123,7 @@ for contour in contours:
     colors.append((rng.randint(0,256), rng.randint(0,256), rng.randint(0,256)))
 
 # Create the result image
-dst = np.zeros((markers.shape[0], markers.shape[1], 3), dtype=np.uint8)
+dst = mx.zeros((markers.shape[0], markers.shape[1], 3), dtype=mx.uint8)
 
 # Fill labeled objects with random colors
 for i in range(markers.shape[0]):

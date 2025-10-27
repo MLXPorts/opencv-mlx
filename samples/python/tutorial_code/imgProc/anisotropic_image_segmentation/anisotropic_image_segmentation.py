@@ -1,6 +1,6 @@
 
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 
 W = 52          # window size is WxW
@@ -13,7 +13,7 @@ HighThr = 57    # threshold2 for orientation, it ranges from 0 to 180
 ## [calcGST_proto]
 def calcGST(inputIMG, w):
 ## [calcGST_proto]
-    img = inputIMG.astype(np.float32)
+    img = inputIMG.astype(mx.float32)
 
     # GST components calculation (start)
     # J =  (J11 J12; J12 J22) - GST
@@ -37,7 +37,7 @@ def calcGST(inputIMG, w):
     tmp2 = J11 - J22
     tmp2 = cv.multiply(tmp2, tmp2)
     tmp3 = cv.multiply(J12, J12)
-    tmp4 = np.sqrt(tmp2 + 4.0 * tmp3)
+    tmp4 = mx.sqrt(tmp2 + 4.0 * tmp3)
 
     lambda1 = 0.5*(tmp1 + tmp4)    # biggest eigenvalue
     lambda2 = 0.5*(tmp1 - tmp4)    # smallest eigenvalue
@@ -85,7 +85,7 @@ imgBin = cv.bitwise_and(imgCoherencyBin, imgOrientationBin)
 imgCoherency = cv.normalize(imgCoherency, None, alpha=0, beta=1, norm_type=cv.NORM_MINMAX, dtype=cv.CV_32F)
 imgOrientation = cv.normalize(imgOrientation, None, alpha=0, beta=1, norm_type=cv.NORM_MINMAX, dtype=cv.CV_32F)
 
-cv.imshow('result.jpg', np.uint8(0.5*(imgIn + imgBin)))
+cv.imshow('result.jpg', mx.uint8(0.5*(imgIn + imgBin)))
 cv.imshow('Coherency.jpg', imgCoherency)
 cv.imshow('Orientation.jpg', imgOrientation)
 cv.waitKey(0)

@@ -22,7 +22,7 @@ USAGE
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 # built-in modules
@@ -42,20 +42,20 @@ def affine_skew(tilt, phi, img, mask=None):
     '''
     h, w = img.shape[:2]
     if mask is None:
-        mask = np.zeros((h, w), np.uint8)
+        mask = mx.zeros((h, w), mx.uint8)
         mask[:] = 255
-    A = np.float32([[1, 0, 0], [0, 1, 0]])
+    A = mx.float32([[1, 0, 0], [0, 1, 0]])
     if phi != 0.0:
-        phi = np.deg2rad(phi)
-        s, c = np.sin(phi), np.cos(phi)
-        A = np.float32([[c,-s], [ s, c]])
+        phi = mx.deg2rad(phi)
+        s, c = mx.sin(phi), mx.cos(phi)
+        A = mx.float32([[c,-s], [ s, c]])
         corners = [[0, 0], [w, 0], [w, h], [0, h]]
-        tcorners = np.int32( np.dot(corners, A.T) )
+        tcorners = mx.int32( mx.dot(corners, A.T) )
         x, y, w, h = cv.boundingRect(tcorners.reshape(1,-1,2))
-        A = np.hstack([A, [[-x], [-y]]])
+        A = mx.hstack([A, [[-x], [-y]]])
         img = cv.warpAffine(img, A, (w, h), flags=cv.INTER_LINEAR, borderMode=cv.BORDER_REPLICATE)
     if tilt != 1.0:
-        s = 0.8*np.sqrt(tilt*tilt-1)
+        s = 0.8*mx.sqrt(tilt*tilt-1)
         img = cv.GaussianBlur(img, (0, 0), sigmaX=s, sigmaY=0.01)
         img = cv.resize(img, (0, 0), fx=1.0/tilt, fy=1.0, interpolation=cv.INTER_NEAREST)
         A[0] /= tilt
@@ -77,8 +77,8 @@ def affine_detect(detector, img, mask=None, pool=None):
     ThreadPool object may be passed to speedup the computation.
     '''
     params = [(1.0, 0.0)]
-    for t in 2**(0.5*np.arange(1,6)):
-        for phi in np.arange(0, 180, 72.0 / t):
+    for t in 2**(0.5*mx.arange(1,6)):
+        for phi in mx.arange(0, 180, 72.0 / t):
             params.append((t, phi))
 
     def f(p):
@@ -87,7 +87,7 @@ def affine_detect(detector, img, mask=None, pool=None):
         keypoints, descrs = detector.detectAndCompute(timg, tmask)
         for kp in keypoints:
             x, y = kp.pt
-            kp.pt = tuple( np.dot(Ai, (x, y, 1)) )
+            kp.pt = tuple( mx.dot(Ai, (x, y, 1)) )
         if descrs is None:
             descrs = []
         return keypoints, descrs
@@ -104,7 +104,7 @@ def affine_detect(detector, img, mask=None, pool=None):
         descrs.extend(d)
 
     print()
-    return keypoints, np.array(descrs)
+    return keypoints, mx.array(descrs)
 
 
 def main():
@@ -147,7 +147,7 @@ def main():
         p1, p2, kp_pairs = filter_matches(kp1, kp2, raw_matches)
         if len(p1) >= 4:
             H, status = cv.findHomography(p1, p2, cv.RANSAC, 5.0)
-            print('%d / %d  inliers/matched' % (np.sum(status), len(status)))
+            print('%d / %d  inliers/matched' % (mx.sum(status), len(status)))
             # do not draw outliers (there will be a lot of them)
             kp_pairs = [kpp for kpp, flag in zip(kp_pairs, status) if flag]
         else:

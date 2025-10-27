@@ -1,7 +1,7 @@
 # To use Inference Engine backend, specify location of plugins:
 # source /opt/intel/computer_vision_sdk/bin/setupvars.sh
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 
 parser = argparse.ArgumentParser(

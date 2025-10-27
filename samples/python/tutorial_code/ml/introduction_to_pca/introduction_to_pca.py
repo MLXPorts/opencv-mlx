@@ -1,7 +1,7 @@
 from __future__ import print_function
 from __future__ import division
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 from math import atan2, cos, sin, sqrt, pi
 
@@ -31,13 +31,13 @@ def getOrientation(pts, img):
     ## [pca]
     # Construct a buffer used by the pca analysis
     sz = len(pts)
-    data_pts = np.empty((sz, 2), dtype=np.float64)
+    data_pts = mx.empty((sz, 2), dtype=mx.float64)
     for i in range(data_pts.shape[0]):
         data_pts[i,0] = pts[i,0,0]
         data_pts[i,1] = pts[i,0,1]
 
     # Perform PCA analysis
-    mean = np.empty((0))
+    mean = mx.empty((0))
     mean, eigenvectors, eigenvalues = cv.PCACompute2(data_pts, mean)
 
     # Store the center of the object

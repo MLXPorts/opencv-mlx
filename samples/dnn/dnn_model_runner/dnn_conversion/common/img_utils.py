@@ -1,5 +1,5 @@
 import cv2
-import numpy as np
+import mlx.core as mx
 
 from .test.configs.default_preprocess_config import BASE_IMG_SCALE_FACTOR
 
@@ -12,7 +12,7 @@ def read_rgb_img(img_file, is_bgr_to_rgb=True):
 
 
 def get_pytorch_preprocess(img):
-    img = img.astype(np.float32)
+    img = img.astype(mx.float32)
     img *= BASE_IMG_SCALE_FACTOR
     img -= [0.485, 0.456, 0.406]
     img /= [0.229, 0.224, 0.225]

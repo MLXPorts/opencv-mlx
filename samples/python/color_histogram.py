@@ -11,7 +11,7 @@ Keys:
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 # built-in modules
@@ -26,8 +26,8 @@ class App():
         self.hist_scale = val
 
     def run(self):
-        hsv_map = np.zeros((180, 256, 3), np.uint8)
-        h, s = np.indices(hsv_map.shape[:2])
+        hsv_map = mx.zeros((180, 256, 3), mx.uint8)
+        h, s = mx.indices(hsv_map.shape[:2])
         hsv_map[:,:,0] = h
         hsv_map[:,:,1] = s
         hsv_map[:,:,2] = 255
@@ -56,8 +56,8 @@ class App():
             hsv[dark] = 0
             h = cv.calcHist([hsv], [0, 1], None, [180, 256], [0, 180, 0, 256])
 
-            h = np.clip(h*0.005*self.hist_scale, 0, 1)
-            vis = hsv_map*h[:,:,np.newaxis] / 255.0
+            h = mx.clip(h*0.005*self.hist_scale, 0, 1)
+            vis = hsv_map*h[:,:,mx.newaxis] / 255.0
             cv.imshow('hist', vis)
 
             ch = cv.waitKey(1)

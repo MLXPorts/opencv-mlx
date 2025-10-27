@@ -27,7 +27,7 @@ from __future__ import print_function
 import sys
 PY3 = sys.version_info[0] == 3
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 # built-in modules
@@ -43,9 +43,9 @@ def toint(p):
     return tuple(map(int, p))
 
 def sample_line(p1, p2, n, noise=0.0):
-    p1 = np.float32(p1)
-    t = np.random.rand(n,1)
-    return p1 + (p2-p1)*t + np.random.normal(size=(n, 2))*noise
+    p1 = mx.float32(p1)
+    t = mx.random.rand(n,1)
+    return p1 + (p2-p1)*t + mx.random.normal(size=(n, 2))*noise
 
 dist_func_names = it.cycle('DIST_L2 DIST_L1 DIST_L12 DIST_FAIR DIST_WELSCH DIST_HUBER'.split())
 
@@ -61,19 +61,19 @@ def update(_=None):
     outn = int(n*r)
 
     p0, p1 = (90, 80), (w-90, h-80)
-    img = np.zeros((h, w, 3), np.uint8)
+    img = mx.zeros((h, w, 3), mx.uint8)
     cv.line(img, toint(p0), toint(p1), (0, 255, 0))
 
     if n > 0:
         line_points = sample_line(p0, p1, n-outn, noise)
-        outliers = np.random.rand(outn, 2) * (w, h)
-        points = np.vstack([line_points, outliers])
+        outliers = mx.random.rand(outn, 2) * (w, h)
+        points = mx.vstack([line_points, outliers])
         for p in line_points:
             cv.circle(img, toint(p), 2, (255, 255, 255), -1)
         for p in outliers:
             cv.circle(img, toint(p), 2, (64, 64, 255), -1)
         func = getattr(cv, cur_func_name)
-        vx, vy, cx, cy = cv.fitLine(np.float32(points), func, 0, 0.01, 0.01)
+        vx, vy, cx, cy = cv.fitLine(mx.float32(points), func, 0, 0.01, 0.01)
         cv.line(img, (int(cx-vx*w), int(cy-vy*w)), (int(cx+vx*w), int(cy+vy*w)), (0, 0, 255))
 
     draw_str(img, (20, 20), cur_func_name)

@@ -8,7 +8,7 @@ This example illustrates how to use cv.HoughCircles() function.
 from __future__ import print_function
 
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import sys
 from numpy import pi, sin, cos
 
@@ -23,7 +23,7 @@ def circleApproximation(circle):
         contour.append(([circle[0] + circle[2]*cos(i*dPhi),
             circle[1] + circle[2]*sin(i*dPhi)]))
 
-    return np.array(contour).astype(int)
+    return mx.array(contour).astype(int)
 
 def convContoursIntersectiponRate(c1, c2):
 
@@ -44,7 +44,7 @@ class houghcircles_test(NewOpenCVTests):
         img = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
         img = cv.medianBlur(img, 5)
 
-        circles = cv.HoughCircles(img, cv.HOUGH_GRADIENT, 1, 10, np.array([]), 100, 30, 1, 30)[0]
+        circles = cv.HoughCircles(img, cv.HOUGH_GRADIENT, 1, 10, mx.array([]), 100, 30, 1, 30)[0]
 
         testCircles = [[38, 181, 17.6],
         [99.7, 166, 13.12],
@@ -84,7 +84,7 @@ class houghcircles_test(NewOpenCVTests):
             method=cv.HOUGH_GRADIENT,
             dp=1,
             minDist=10,
-            circles=np.array([]),
+            circles=mx.array([]),
             param1=150,
             param2=45,
             minRadius=1,
@@ -102,7 +102,7 @@ class houghcircles_test(NewOpenCVTests):
         img = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
         img = cv.medianBlur(img, 5)
 
-        circles = cv.HoughCircles(img, cv.HOUGH_GRADIENT_ALT, 1, 10, np.array([]), 300, 0.9, 1, 30)
+        circles = cv.HoughCircles(img, cv.HOUGH_GRADIENT_ALT, 1, 10, mx.array([]), 300, 0.9, 1, 30)
 
         self.assertEqual(circles.shape, (1, 18, 3))
 
@@ -146,7 +146,7 @@ class houghcircles_test(NewOpenCVTests):
             method=cv.HOUGH_GRADIENT_ALT,
             dp=1,
             minDist=10,
-            circles=np.array([]),
+            circles=mx.array([]),
             param1=300,
             param2=0.9,
             minRadius=13,

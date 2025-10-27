@@ -109,7 +109,7 @@ with open('tf_result.json', 'wt') as f:
 import matplotlib.pyplot as plt
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
-import numpy as np
+import mlx.core as mx
 import skimage.io as io
 import pylab
 pylab.rcParams['figure.figsize'] = (10.0, 8.0)

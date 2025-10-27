@@ -1,5 +1,5 @@
 import os
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import argparse
 from common import findFile
@@ -61,11 +61,11 @@ def classify_video(video_path, net_path):
             frames.append(frame)
 
         inputs = cv.dnn.blobFromImages(frames, 1, (SAMPLE_SIZE, SAMPLE_SIZE), mean, True, crop=True)
-        inputs = np.transpose(inputs, (1, 0, 2, 3))
-        inputs = np.expand_dims(inputs, axis=0)
+        inputs = mx.transpose(inputs, (1, 0, 2, 3))
+        inputs = mx.expand_dims(inputs, axis=0)
         net.setInput(inputs)
         outputs = net.forward()
-        class_pred = np.argmax(outputs)
+        class_pred = mx.argmax(outputs)
         label = class_names[class_pred]
 
         for frame in frames:

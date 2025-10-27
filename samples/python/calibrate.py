@@ -28,7 +28,7 @@ NOTE: Chessboard size is defined in inner corners. Charuco board size is defined
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 # local modules
@@ -71,8 +71,8 @@ def main():
 
     pattern_size = (width, height)
     if pattern_type == 'chessboard':
-        pattern_points = np.zeros((np.prod(pattern_size), 3), np.float32)
-        pattern_points[:, :2] = np.indices(pattern_size).T.reshape(-1, 2)
+        pattern_points = mx.zeros((mx.prod(pattern_size), 3), mx.float32)
+        pattern_points[:, :2] = mx.indices(pattern_size).T.reshape(-1, 2)
         pattern_points *= square_size
 
     obj_points = []

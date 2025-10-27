@@ -1,6 +1,6 @@
 import argparse
 import time
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 
@@ -102,7 +102,7 @@ def process_landmarks(r_x, r_y, r_w, r_h, landmarks):
     lmrks = landmarks[0]
     raw_x = lmrks[::2] * r_w + r_x
     raw_y = lmrks[1::2] * r_h + r_y
-    return np.array([[int(x), int(y)] for x, y in zip(raw_x, raw_y)])
+    return mx.array([[int(x), int(y)] for x, y in zip(raw_x, raw_y)])
 
 
 def eye_box(p_1, p_2, scale=1.8):
@@ -117,7 +117,7 @@ def eye_box(p_1, p_2, scale=1.8):
     Bounding box of eye and its midpoint
     """
 
-    size = np.linalg.norm(p_1 - p_2)
+    size = mx.linalg.norm(p_1 - p_2)
     midpoint = (p_1 + p_2) / 2
     width = scale * size
     height = width
@@ -172,7 +172,7 @@ class GProcessPosesImpl:
         Return:
         Arrays with heads poses
         """
-        return [np.array([ys[0], ps[0], rs[0]]).T for ys, ps, rs in zip(in_ys, in_ps, in_rs)]
+        return [mx.array([ys[0], ps[0], rs[0]]).T for ys, ps, rs in zip(in_ys, in_ps, in_rs)]
 
 
 @cv.gapi.kernel(GParseEyes)
@@ -362,9 +362,9 @@ if __name__ == '__main__':
         PINK = (255, 0, 255)
         YELLOW = (0, 255, 255)
 
-        M_PI_180 = np.pi / 180
-        M_PI_2 = np.pi / 2
-        M_PI = np.pi
+        M_PI_180 = mx.pi / 180
+        M_PI_2 = mx.pi / 2
+        M_PI = mx.pi
 
         FACES_SIZE = len(outr)
 
@@ -383,13 +383,13 @@ if __name__ == '__main__':
             yaw = out_y[i]
             pitch = out_p[i]
             roll = out_r[i]
-            sin_y = np.sin(yaw[:] * M_PI_180)
-            sin_p = np.sin(pitch[:] * M_PI_180)
-            sin_r = np.sin(roll[:] * M_PI_180)
+            sin_y = mx.sin(yaw[:] * M_PI_180)
+            sin_p = mx.sin(pitch[:] * M_PI_180)
+            sin_r = mx.sin(roll[:] * M_PI_180)
 
-            cos_y = np.cos(yaw[:] * M_PI_180)
-            cos_p = np.cos(pitch[:] * M_PI_180)
-            cos_r = np.cos(roll[:] * M_PI_180)
+            cos_y = mx.cos(yaw[:] * M_PI_180)
+            cos_p = mx.cos(pitch[:] * M_PI_180)
+            cos_r = mx.cos(roll[:] * M_PI_180)
 
             axis_length = 0.4 * rwidth
             x_center = int(rx + rwidth / 2)
@@ -415,7 +415,7 @@ if __name__ == '__main__':
 
             scale_box = 0.002 * rwidth
             cv.putText(oimg, "head pose: (y=%0.0f, p=%0.0f, r=%0.0f)" %
-                       (np.round(yaw), np.round(pitch), np.round(roll)),
+                       (mx.round(yaw), mx.round(pitch), mx.round(roll)),
                        [int(rx), int(ry + rheight + 5 * rwidth / 100)],
                        cv.FONT_HERSHEY_PLAIN, scale_box * 2, WHITE, 1)
 
@@ -426,7 +426,7 @@ if __name__ == '__main__':
             cv.rectangle(oimg, r_eyes[i], color_r, 1)
 
             # Gaze vectors
-            norm_gazes = np.linalg.norm(outg[i][0])
+            norm_gazes = mx.linalg.norm(outg[i][0])
             gaze_vector = outg[i][0] / norm_gazes
 
             arrow_length = 0.4 * rwidth
@@ -440,10 +440,10 @@ if __name__ == '__main__':
 
             v0, v1, v2 = outg[i][0]
 
-            gaze_angles = [180 / M_PI * (M_PI_2 + np.arctan2(v2, v0)),
-                           180 / M_PI * (M_PI_2 - np.arccos(v1 / norm_gazes))]
+            gaze_angles = [180 / M_PI * (M_PI_2 + mx.arctan2(v2, v0)),
+                           180 / M_PI * (M_PI_2 - mx.arccos(v1 / norm_gazes))]
             cv.putText(oimg, "gaze angles: (h=%0.0f, v=%0.0f)" %
-                       (np.round(gaze_angles[0]), np.round(gaze_angles[1])),
+                       (mx.round(gaze_angles[0]), mx.round(gaze_angles[1])),
                        [int(rx), int(ry + rheight + 12 * rwidth / 100)],
                        cv.FONT_HERSHEY_PLAIN, scale_box * 2, WHITE, 1)
 

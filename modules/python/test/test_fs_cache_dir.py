@@ -1,7 +1,7 @@
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import os
 import datetime
@@ -17,8 +17,8 @@ class get_cache_dir_test(NewOpenCVTests):
 
     def get_cache_dir_imread_interop(self, ext):
         path = cv.utils.fs.getCacheDirectoryForDownloads()
-        gold_image = np.ones((16, 16, 3), np.uint8)
-        read_from_file = np.zeros((16, 16, 3), np.uint8)
+        gold_image = mx.ones((16, 16, 3), mx.uint8)
+        read_from_file = mx.zeros((16, 16, 3), mx.uint8)
         test_file_name = os.path.join(path, "test." + ext)
         try:
             cv.imwrite(test_file_name, gold_image)

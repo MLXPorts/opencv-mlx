@@ -3,7 +3,7 @@
 from itertools import product
 from functools import reduce
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 from tests_common import NewOpenCVTests
@@ -11,41 +11,41 @@ from tests_common import NewOpenCVTests
 
 def norm_inf(x, y=None):
     def norm(vec):
-        return np.linalg.norm(vec.flatten(), np.inf)
+        return mx.linalg.norm(vec.flatten(), mx.inf)
 
-    x = x.astype(np.float64)
-    return norm(x) if y is None else norm(x - y.astype(np.float64))
+    x = x.astype(mx.float64)
+    return norm(x) if y is None else norm(x - y.astype(mx.float64))
 
 
 def norm_l1(x, y=None):
     def norm(vec):
-        return np.linalg.norm(vec.flatten(), 1)
+        return mx.linalg.norm(vec.flatten(), 1)
 
-    x = x.astype(np.float64)
-    return norm(x) if y is None else norm(x - y.astype(np.float64))
+    x = x.astype(mx.float64)
+    return norm(x) if y is None else norm(x - y.astype(mx.float64))
 
 
 def norm_l2(x, y=None):
     def norm(vec):
-        return np.linalg.norm(vec.flatten())
+        return mx.linalg.norm(vec.flatten())
 
-    x = x.astype(np.float64)
-    return norm(x) if y is None else norm(x - y.astype(np.float64))
+    x = x.astype(mx.float64)
+    return norm(x) if y is None else norm(x - y.astype(mx.float64))
 
 
 def norm_l2sqr(x, y=None):
     def norm(vec):
-        return np.square(vec).sum()
+        return mx.square(vec).sum()
 
-    x = x.astype(np.float64)
-    return norm(x) if y is None else norm(x - y.astype(np.float64))
+    x = x.astype(mx.float64)
+    return norm(x) if y is None else norm(x - y.astype(mx.float64))
 
 
 def norm_hamming(x, y=None):
     def norm(vec):
         return sum(bin(i).count('1') for i in vec.flatten())
 
-    return norm(x) if y is None else norm(np.bitwise_xor(x, y))
+    return norm(x) if y is None else norm(mx.bitwise_xor(x, y))
 
 
 def norm_hamming2(x, y=None):
@@ -61,7 +61,7 @@ def norm_hamming2(x, y=None):
 
         return sum(element_norm(element) for element in vec.flatten())
 
-    return norm(x) if y is None else norm(np.bitwise_xor(x, y))
+    return norm(x) if y is None else norm(mx.bitwise_xor(x, y))
 
 
 norm_type_under_test = {
@@ -85,17 +85,17 @@ norm_name = {
 
 def get_element_types(norm_type):
     if norm_type in (cv.NORM_HAMMING, cv.NORM_HAMMING2):
-        return (np.uint8,)
+        return (mx.uint8,)
     else:
-        return (np.uint8, np.int8, np.uint16, np.int16, np.int32, np.float32,
-                np.float64, np.float16)
+        return (mx.uint8, mx.int8, mx.uint16, mx.int16, mx.int32, mx.float32,
+                mx.float64, mx.float16)
 
 
 def generate_vector(shape, dtype):
-    if np.issubdtype(dtype, np.integer):
-        return np.random.randint(0, 100, shape).astype(dtype)
+    if mx.issubdtype(dtype, mx.integer):
+        return mx.random.randint(0, 100, shape).astype(dtype)
     else:
-        return np.random.normal(10., 12.5, shape).astype(dtype)
+        return mx.random.normal(10., 12.5, shape).astype(dtype)
 
 
 shapes = (1, 2, 3, 5, 7, 16, (1, 1), (2, 2), (3, 5), (1, 7))
@@ -104,7 +104,7 @@ shapes = (1, 2, 3, 5, 7, 16, (1, 1), (2, 2), (3, 5), (1, 7))
 class norm_test(NewOpenCVTests):
 
     def test_norm_for_one_array(self):
-        np.random.seed(123)
+        mx.random.seed(123)
         for norm_type, norm in norm_type_under_test.items():
             element_types = get_element_types(norm_type)
             for shape, element_type in product(shapes, element_types):
@@ -119,7 +119,7 @@ class norm_test(NewOpenCVTests):
                 )
 
     def test_norm_for_two_arrays(self):
-        np.random.seed(456)
+        mx.random.seed(456)
         for norm_type, norm in norm_type_under_test.items():
             element_types = get_element_types(norm_type)
             for shape, element_type in product(shapes, element_types):
@@ -141,7 +141,7 @@ class norm_test(NewOpenCVTests):
                                    msg='Type is not checked {0}'.format(
                                        norm_name[norm_type]
                                    )):
-                cv.norm(np.array([1, 2], dtype=np.int32), norm_type)
+                cv.norm(mx.array([1, 2], dtype=mx.int32), norm_type)
 
     def test_norm_fails_for_array_and_scalar(self):
         for norm_type in norm_type_under_test:
@@ -149,7 +149,7 @@ class norm_test(NewOpenCVTests):
                                    msg='Exception is not thrown for {0}'.format(
                                        norm_name[norm_type]
                                    )):
-                cv.norm(np.array([1, 2], dtype=np.uint8), 123, norm_type)
+                cv.norm(mx.array([1, 2], dtype=mx.uint8), 123, norm_type)
 
     def test_norm_fails_for_scalar_and_array(self):
         for norm_type in norm_type_under_test:
@@ -157,7 +157,7 @@ class norm_test(NewOpenCVTests):
                                    msg='Exception is not thrown for {0}'.format(
                                        norm_name[norm_type]
                                    )):
-                cv.norm(4, np.array([1, 2], dtype=np.uint8), norm_type)
+                cv.norm(4, mx.array([1, 2], dtype=mx.uint8), norm_type)
 
     def test_norm_fails_for_array_and_norm_type_as_scalar(self):
         for norm_type in norm_type_under_test:
@@ -165,7 +165,7 @@ class norm_test(NewOpenCVTests):
                                    msg='Exception is not thrown for {0}'.format(
                                        norm_name[norm_type]
                                    )):
-                cv.norm(np.array([3, 4, 5], dtype=np.uint8),
+                cv.norm(mx.array([3, 4, 5], dtype=mx.uint8),
                         norm_type, normType=norm_type)
 
 

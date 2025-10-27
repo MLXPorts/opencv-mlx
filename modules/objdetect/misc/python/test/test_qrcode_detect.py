@@ -6,7 +6,7 @@ QR code detect and decode pipeline.
 ===============================================================================
 '''
 import os
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 from tests_common import NewOpenCVTests, unittest

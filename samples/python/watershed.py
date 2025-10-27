@@ -25,7 +25,7 @@ Keys
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 from common import Sketcher
 
@@ -36,10 +36,10 @@ class App:
             raise Exception('Failed to load image file: %s' % fn)
 
         h, w = self.img.shape[:2]
-        self.markers = np.zeros((h, w), np.int32)
+        self.markers = mx.zeros((h, w), mx.int32)
         self.markers_vis = self.img.copy()
         self.cur_marker = 1
-        self.colors = np.int32( list(np.ndindex(2, 2, 2)) ) * 255
+        self.colors = mx.int32( list(mx.ndindex(2, 2, 2)) ) * 255
 
         self.auto_update = True
         self.sketch = Sketcher('img', [self.markers_vis, self.markers], self.get_colors)
@@ -50,7 +50,7 @@ class App:
     def watershed(self):
         m = self.markers.copy()
         cv.watershed(self.img, m)
-        overlay = self.colors[np.maximum(m, 0)]
+        overlay = self.colors[mx.maximum(m, 0)]
         vis = cv.addWeighted(self.img, 0.5, overlay, 0.5, 0.0, dtype=cv.CV_8UC3)
         cv.imshow('watershed', vis)
 

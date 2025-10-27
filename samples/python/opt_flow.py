@@ -16,7 +16,7 @@ Keys:
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 import video
@@ -24,10 +24,10 @@ import video
 
 def draw_flow(img, flow, step=16):
     h, w = img.shape[:2]
-    y, x = np.mgrid[step/2:h:step, step/2:w:step].reshape(2,-1).astype(int)
+    y, x = mx.mgrid[step/2:h:step, step/2:w:step].reshape(2,-1).astype(int)
     fx, fy = flow[y,x].T
-    lines = np.vstack([x, y, x+fx, y+fy]).T.reshape(-1, 2, 2)
-    lines = np.int32(lines + 0.5)
+    lines = mx.vstack([x, y, x+fx, y+fy]).T.reshape(-1, 2, 2)
+    lines = mx.int32(lines + 0.5)
     vis = cv.cvtColor(img, cv.COLOR_GRAY2BGR)
     cv.polylines(vis, lines, 0, (0, 255, 0))
     for (x1, y1), (_x2, _y2) in lines:
@@ -38,12 +38,12 @@ def draw_flow(img, flow, step=16):
 def draw_hsv(flow):
     h, w = flow.shape[:2]
     fx, fy = flow[:,:,0], flow[:,:,1]
-    ang = np.arctan2(fy, fx) + np.pi
-    v = np.sqrt(fx*fx+fy*fy)
-    hsv = np.zeros((h, w, 3), np.uint8)
-    hsv[...,0] = ang*(180/np.pi/2)
+    ang = mx.arctan2(fy, fx) + mx.pi
+    v = mx.sqrt(fx*fx+fy*fy)
+    hsv = mx.zeros((h, w, 3), mx.uint8)
+    hsv[...,0] = ang*(180/mx.pi/2)
     hsv[...,1] = 255
-    hsv[...,2] = np.minimum(v*4, 255)
+    hsv[...,2] = mx.minimum(v*4, 255)
     bgr = cv.cvtColor(hsv, cv.COLOR_HSV2BGR)
     return bgr
 
@@ -51,8 +51,8 @@ def draw_hsv(flow):
 def warp_flow(img, flow):
     h, w = flow.shape[:2]
     flow = -flow
-    flow[:,:,0] += np.arange(w)
-    flow[:,:,1] += np.arange(h)[:,np.newaxis]
+    flow[:,:,0] += mx.arange(w)
+    flow[:,:,1] += mx.arange(h)[:,mx.newaxis]
     res = cv.remap(img, flow, None, cv.INTER_LINEAR)
     return res
 

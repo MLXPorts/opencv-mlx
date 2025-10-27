@@ -4,7 +4,7 @@
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import argparse
 import sys
@@ -12,7 +12,7 @@ import sys
 # [get-psnr]
 def getPSNR(I1, I2):
     s1 = cv.absdiff(I1, I2) #|I1 - I2|
-    s1 = np.float32(s1)     # cannot make a square on 8 bits
+    s1 = mx.float32(s1)     # cannot make a square on 8 bits
     s1 = s1 * s1            # |I1 - I2|^2
     sse = s1.sum()          # sum elements per channel
     if sse <= 1e-10:        # sum channels
@@ -20,7 +20,7 @@ def getPSNR(I1, I2):
     else:
         shape = I1.shape
         mse = 1.0 * sse / (shape[0] * shape[1] * shape[2])
-        psnr = 10.0 * np.log10((255 * 255) / mse)
+        psnr = 10.0 * mx.log10((255 * 255) / mse)
         return psnr
 # [get-psnr]
 
@@ -30,8 +30,8 @@ def getMSSISM(i1, i2):
     C2 = 58.5225
     # INITS
 
-    I1 = np.float32(i1) # cannot calculate on one byte large values
-    I2 = np.float32(i2)
+    I1 = mx.float32(i1) # cannot calculate on one byte large values
+    I2 = mx.float32(i2)
 
     I2_2 = I2 * I2 # I2^2
     I1_2 = I1 * I1 # I1^2

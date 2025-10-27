@@ -30,7 +30,7 @@ Key 's' - To save the results
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 import sys
@@ -109,8 +109,8 @@ class App():
 
         self.img = cv.imread(cv.samples.findFile(filename))
         self.img2 = self.img.copy()                               # a copy of original image
-        self.mask = np.zeros(self.img.shape[:2], dtype = np.uint8) # mask initialized to PR_BG
-        self.output = np.zeros(self.img.shape, np.uint8)           # output image to be shown
+        self.mask = mx.zeros(self.img.shape[:2], dtype = mx.uint8) # mask initialized to PR_BG
+        self.output = mx.zeros(self.img.shape, mx.uint8)           # output image to be shown
 
         # input and output windows
         cv.namedWindow('output')
@@ -141,8 +141,8 @@ class App():
             elif k == ord('3'): # PR_FG drawing
                 self.value = self.DRAW_PR_FG
             elif k == ord('s'): # save image
-                bar = np.zeros((self.img.shape[0], 5, 3), np.uint8)
-                res = np.hstack((self.img2, bar, self.img, bar, self.output))
+                bar = mx.zeros((self.img.shape[0], 5, 3), mx.uint8)
+                res = mx.hstack((self.img2, bar, self.img, bar, self.output))
                 cv.imwrite('grabcut_output.png', res)
                 print(" Result saved as image \n")
             elif k == ord('r'): # reset everything
@@ -154,14 +154,14 @@ class App():
                 self.rect_over = False
                 self.value = self.DRAW_FG
                 self.img = self.img2.copy()
-                self.mask = np.zeros(self.img.shape[:2], dtype = np.uint8) # mask initialized to PR_BG
-                self.output = np.zeros(self.img.shape, np.uint8)           # output image to be shown
+                self.mask = mx.zeros(self.img.shape[:2], dtype = mx.uint8) # mask initialized to PR_BG
+                self.output = mx.zeros(self.img.shape, mx.uint8)           # output image to be shown
             elif k == ord('n'): # segment the image
                 print(""" For finer touchups, mark foreground and background after pressing keys 0-3
                 and again press 'n' \n""")
                 try:
-                    bgdmodel = np.zeros((1, 65), np.float64)
-                    fgdmodel = np.zeros((1, 65), np.float64)
+                    bgdmodel = mx.zeros((1, 65), mx.float64)
+                    fgdmodel = mx.zeros((1, 65), mx.float64)
                     if (self.rect_or_mask == 0):         # grabcut with rect
                         cv.grabCut(self.img2, self.mask, self.rect, bgdmodel, fgdmodel, 1, cv.GC_INIT_WITH_RECT)
                         self.rect_or_mask = 1
@@ -171,7 +171,7 @@ class App():
                     import traceback
                     traceback.print_exc()
 
-            mask2 = np.where((self.mask==1) + (self.mask==3), 255, 0).astype('uint8')
+            mask2 = mx.where((self.mask==1) + (self.mask==3), 255, 0).astype('uint8')
             self.output = cv.bitwise_and(self.img2, self.img2, mask=mask2)
 
         print('Done')

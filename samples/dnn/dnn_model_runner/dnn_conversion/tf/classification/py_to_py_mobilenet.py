@@ -1,7 +1,7 @@
 import os
 
 import cv2
-import numpy as np
+import mlx.core as mx
 import tensorflow as tf
 from tensorflow.keras.applications import MobileNet
 from tensorflow.python.framework.convert_to_constants import convert_variables_to_constants_v2
@@ -43,10 +43,10 @@ def get_tf_model_proto(tf_model):
 def get_preprocessed_img(img_path):
     # read the image
     input_img = cv2.imread(img_path, cv2.IMREAD_COLOR)
-    input_img = input_img.astype(np.float32)
+    input_img = input_img.astype(mx.float32)
 
     # define preprocess parameters
-    mean = np.array([1.0, 1.0, 1.0]) * 127.5
+    mean = mx.array([1.0, 1.0, 1.0]) * 127.5
     scale = 1 / 127.5
 
     # prepare input blob to fit the model input:
@@ -81,7 +81,7 @@ def get_opencv_dnn_prediction(opencv_net, preproc_img, imagenet_labels):
     print("* shape: ", out.shape)
 
     # get the predicted class ID
-    imagenet_class_id = np.argmax(out)
+    imagenet_class_id = mx.argmax(out)
 
     # get confidence
     confidence = out[0][imagenet_class_id]
@@ -100,7 +100,7 @@ def get_tf_dnn_prediction(original_net, preproc_img, imagenet_labels):
     print("* shape: ", out.shape)
 
     # get the predicted class ID
-    imagenet_class_id = np.argmax(out)
+    imagenet_class_id = mx.argmax(out)
     print("* class ID: {}, label: {}".format(imagenet_class_id, imagenet_labels[imagenet_class_id]))
 
     # get confidence

@@ -1,6 +1,6 @@
 from __future__ import print_function
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 from math import sqrt
 
@@ -48,10 +48,10 @@ inliers2 = []
 good_matches = []
 inlier_threshold = 2.5 # Distance threshold to identify inliers with homography check
 for i, m in enumerate(matched1):
-    col = np.ones((3,1), dtype=np.float64)
+    col = mx.ones((3,1), dtype=mx.float64)
     col[0:2,0] = m.pt
 
-    col = np.dot(homography, col)
+    col = mx.dot(homography, col)
     col /= col[2,0]
     dist = sqrt(pow(col[0,0] - matched2[i].pt[0], 2) +\
                 pow(col[1,0] - matched2[i].pt[1], 2))
@@ -63,7 +63,7 @@ for i, m in enumerate(matched1):
 ## [homography check]
 
 ## [draw final matches]
-res = np.empty((max(img1.shape[0], img2.shape[0]), img1.shape[1]+img2.shape[1], 3), dtype=np.uint8)
+res = mx.empty((max(img1.shape[0], img2.shape[0]), img1.shape[1]+img2.shape[1], 3), dtype=mx.uint8)
 cv.drawMatches(img1, inliers1, img2, inliers2, good_matches, res)
 cv.imwrite("akaze_result.png", res)
 

@@ -35,7 +35,7 @@ from __future__ import print_function
 
 import sys
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import argparse
 

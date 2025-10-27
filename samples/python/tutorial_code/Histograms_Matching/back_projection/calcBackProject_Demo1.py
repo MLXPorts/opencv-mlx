@@ -1,7 +1,7 @@
 from __future__ import print_function
 from __future__ import division
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 
 def Hist_and_Backproj(val):
@@ -28,10 +28,10 @@ def Hist_and_Backproj(val):
     w = 400
     h = 400
     bin_w = int(round(w / histSize))
-    histImg = np.zeros((h, w, 3), dtype=np.uint8)
+    histImg = mx.zeros((h, w, 3), dtype=mx.uint8)
 
     for i in range(bins):
-        cv.rectangle(histImg, (i*bin_w, h), ( (i+1)*bin_w, h - int(np.round( hist[i]*h/255.0 )) ), (0, 0, 255), cv.FILLED)
+        cv.rectangle(histImg, (i*bin_w, h), ( (i+1)*bin_w, h - int(mx.round( hist[i]*h/255.0 )) ), (0, 0, 255), cv.FILLED)
 
     cv.imshow('Histogram', histImg)
     ## [Draw the histogram]
@@ -53,7 +53,7 @@ hsv = cv.cvtColor(src, cv.COLOR_BGR2HSV)
 
 ## [Use only the Hue value]
 ch = (0, 0)
-hue = np.empty(hsv.shape, hsv.dtype)
+hue = mx.empty(hsv.shape, hsv.dtype)
 cv.mixChannels([hsv], [hue], ch)
 ## [Use only the Hue value]
 

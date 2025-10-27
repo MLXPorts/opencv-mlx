@@ -11,7 +11,7 @@ Usage:
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 import argparse
@@ -63,7 +63,7 @@ class QrSample:
             decode_info = [decode_info]
         if n > 0:
             for i in range(n):
-                cnt = np.array(points[i]).reshape((-1, 1, 2)).astype(np.int32)
+                cnt = mx.array(points[i]).reshape((-1, 1, 2)).astype(mx.int32)
                 self.drawQRCodeContours(result, cnt)
                 msg = 'QR[{:d}]@{} : '.format(i, *(cnt.reshape(1, -1).tolist()))
                 print(msg, end="")

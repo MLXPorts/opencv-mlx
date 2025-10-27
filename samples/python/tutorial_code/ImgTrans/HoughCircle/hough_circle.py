@@ -1,6 +1,6 @@
 import sys
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 
 
 def main(argv):
@@ -37,7 +37,7 @@ def main(argv):
 
     ## [draw]
     if circles is not None:
-        circles = np.uint16(np.around(circles))
+        circles = mx.uint16(mx.around(circles))
         for i in circles[0, :]:
             center = (i[0], i[1])
             # circle center

@@ -1,4 +1,4 @@
-import numpy as np
+import mlx.core as mx
 
 from ..accuracy_eval import SemSegmEvaluation
 from ..utils import plot_acc
@@ -26,7 +26,7 @@ def test_segm_models(models_list, data_fetcher, eval_params, experiment_name, is
 
     accuracy_evaluator = SemSegmEvaluation(eval_params.log, eval_params.img_cls_file, eval_params.batch_size)
     accuracy_evaluator.process(models_list, data_fetcher)
-    accuracy_array = np.array(accuracy_evaluator.general_fw_accuracy)
+    accuracy_array = mx.array(accuracy_evaluator.general_fw_accuracy)
 
     print(
         "===== End of processing. Accuracy results:\n"

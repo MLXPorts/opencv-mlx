@@ -20,7 +20,7 @@ PY3 = sys.version_info[0] == 3
 if PY3:
     xrange = range
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 from tst_scene_render import TestSceneRender
 
@@ -54,7 +54,7 @@ class camshift_test(NewOpenCVTests):
             framesCounter += 1
             self.frame = self.render.getNextFrame()
             hsv = cv.cvtColor(self.frame, cv.COLOR_BGR2HSV)
-            mask = cv.inRange(hsv, np.array((0., 60., 32.)), np.array((180., 255., 255.)))
+            mask = cv.inRange(hsv, mx.array((0., 60., 32.)), mx.array((180., 255., 255.)))
 
             if self.selection:
                 x0, y0, x1, y1 = self.render.getCurrentRect() + 50
@@ -75,7 +75,7 @@ class camshift_test(NewOpenCVTests):
                 term_crit = ( cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 10, 1 )
                 _track_box, self.track_window = cv.CamShift(prob, self.track_window, term_crit)
 
-            trackingRect = np.array(self.track_window)
+            trackingRect = mx.array(self.track_window)
             trackingRect[2] += trackingRect[0]
             trackingRect[3] += trackingRect[1]
 

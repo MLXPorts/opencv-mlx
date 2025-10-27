@@ -1,6 +1,6 @@
 import os
 
-import numpy as np
+import mlx.core as mx
 
 from .configs.test_config import CommonConfig
 from ..utils import create_parser, plot_acc
@@ -108,7 +108,7 @@ class ModelTestPipeline:
 
         if is_plot_acc:
             plot_acc(
-                np.array(self._accuracy_evaluator.general_inference_time),
+                mx.array(self._accuracy_evaluator.general_inference_time),
                 formatted_exp_name
             )
 

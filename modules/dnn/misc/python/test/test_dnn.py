@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 import os
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 
 from tests_common import NewOpenCVTests, unittest
 
 def normAssert(test, a, b, msg=None, lInf=1e-5):
-    test.assertLess(np.max(np.abs(a - b)), lInf, msg)
+    test.assertLess(mx.max(mx.abs(a - b)), lInf, msg)
 
 def inter_area(box1, box2):
     x_min, x_max = max(box1[0], box2[0]), min(box1[2], box2[2])
@@ -116,7 +116,7 @@ class dnn_test(NewOpenCVTests):
         try:
             net.setPreferableBackend(backend)
             net.setPreferableTarget(target)
-            inp = np.random.standard_normal([1, 2, 10, 11]).astype(np.float32)
+            inp = mx.random.standard_normal([1, 2, 10, 11]).astype(mx.float32)
             net.setInput(inp)
             net.forward()
         except BaseException:
@@ -136,9 +136,9 @@ class dnn_test(NewOpenCVTests):
         paramNet.swapRB = False
         paramNet.datalayout = cv.dnn.DNN_LAYOUT_NCHW
         paramNet.paddingmode = cv.dnn.DNN_PMODE_LETTERBOX
-        rBlob = np.zeros(shape=(20, 4), dtype=np.int32)
+        rBlob = mx.zeros(shape=(20, 4), dtype=mx.int32)
         rImg = paramNet.blobRectsToImageRects(rBlob, (356, 356))
-        self.assertTrue(type(rImg[0, 0])==np.int32)
+        self.assertTrue(type(rImg[0, 0])==mx.int32)
         self.assertTrue(rImg.shape==(20, 4))
 
     def test_blobRectToImageRect(self):
@@ -150,13 +150,13 @@ class dnn_test(NewOpenCVTests):
         paramNet.swapRB = False
         paramNet.datalayout = cv.dnn.DNN_LAYOUT_NCHW
         paramNet.paddingmode = cv.dnn.DNN_PMODE_LETTERBOX
-        rBlob = np.zeros(shape=(20, 4), dtype=np.int32)
+        rBlob = mx.zeros(shape=(20, 4), dtype=mx.int32)
         rImg = paramNet.blobRectToImageRect((0, 0, 0, 0), (356, 356))
         self.assertTrue(type(rImg[0])==int)
 
 
     def test_blobFromImage(self):
-        np.random.seed(324)
+        mx.random.seed(324)
 
         width = 6
         height = 7
@@ -164,7 +164,7 @@ class dnn_test(NewOpenCVTests):
         mean = (10, 20, 30)
 
         # Test arguments names.
-        img = np.random.randint(0, 255, [4, 5, 3]).astype(np.uint8)
+        img = mx.random.randint(0, 255, [4, 5, 3]).astype(mx.uint8)
         blob = cv.dnn.blobFromImage(img, scale, (width, height), mean, True, False)
         blob_args = cv.dnn.blobFromImage(img, scalefactor=scale, size=(width, height),
                                          mean=mean, swapRB=True, crop=False)
@@ -172,7 +172,7 @@ class dnn_test(NewOpenCVTests):
 
         # Test values.
         target = cv.resize(img, (width, height), interpolation=cv.INTER_LINEAR)
-        target = target.astype(np.float32)
+        target = target.astype(mx.float32)
         target = target[:,:,[2, 1, 0]]  # BGR2RGB
         target[:,:,0] -= mean[0]
         target[:,:,1] -= mean[1]
@@ -182,16 +182,16 @@ class dnn_test(NewOpenCVTests):
         normAssert(self, blob, target)
 
     def test_blobFromImageWithParams(self):
-        np.random.seed(324)
+        mx.random.seed(324)
 
         width = 6
         height = 7
-        stddev = np.array([0.2, 0.3, 0.4])
+        stddev = mx.array([0.2, 0.3, 0.4])
         scalefactor = 1.0/127.5 * stddev
         mean = (10, 20, 30)
 
         # Test arguments names.
-        img = np.random.randint(0, 255, [4, 5, 3]).astype(np.uint8)
+        img = mx.random.randint(0, 255, [4, 5, 3]).astype(mx.uint8)
 
         param = cv.dnn.Image2BlobParams()
         param.scalefactor = scalefactor
@@ -205,7 +205,7 @@ class dnn_test(NewOpenCVTests):
                                                                       swapRB=True, datalayout=cv.dnn.DNN_LAYOUT_NHWC))
         normAssert(self, blob, blob_args)
 
-        target2 = cv.resize(img, (width, height), interpolation=cv.INTER_LINEAR).astype(np.float32)
+        target2 = cv.resize(img, (width, height), interpolation=cv.INTER_LINEAR).astype(mx.float32)
         target2 = target2[:,:,[2, 1, 0]]  # BGR2RGB
         target2[:,:,0] -= mean[0]
         target2[:,:,1] -= mean[1]
@@ -244,7 +244,7 @@ class dnn_test(NewOpenCVTests):
 
         for box in boxes:
             cv.rectangle(frame, box, (0, 255, 0))
-            cv.rectangle(frame, np.array(box), (0, 255, 0))
+            cv.rectangle(frame, mx.array(box), (0, 255, 0))
             cv.rectangle(frame, tuple(box), (0, 255, 0))
             cv.rectangle(frame, list(box), (0, 255, 0))
 
@@ -253,7 +253,7 @@ class dnn_test(NewOpenCVTests):
         img_path = self.find_dnn_file("dnn/googlenet_0.png")
         weights = self.find_dnn_file("dnn/squeezenet_v1.1.caffemodel", required=False)
         config = self.find_dnn_file("dnn/squeezenet_v1.1.prototxt")
-        ref = np.load(self.find_dnn_file("dnn/squeezenet_v1.1_prob.npy"))
+        ref = mx.load(self.find_dnn_file("dnn/squeezenet_v1.1_prob.npy"))
         if weights is None or config is None:
             raise unittest.SkipTest("Missing DNN test files (dnn/squeezenet_v1.1.{prototxt/caffemodel}). Verify OPENCV_DNN_TEST_DATA_PATH configuration parameter.")
 
@@ -282,7 +282,7 @@ class dnn_test(NewOpenCVTests):
         out, _ = model.detect(frame)
 
         self.assertTrue(type(out) == tuple, msg='actual type {}'.format(str(type(out))))
-        self.assertTrue(np.array(out).shape == (2, 4, 2))
+        self.assertTrue(mx.array(out).shape == (2, 4, 2))
 
 
     def test_face_detection(self):
@@ -314,7 +314,7 @@ class dnn_test(NewOpenCVTests):
             scoresDiff = 4e-3 if target in [cv.dnn.DNN_TARGET_OPENCL_FP16, cv.dnn.DNN_TARGET_MYRIAD] else 1e-5
             iouDiff = 2e-2 if target in [cv.dnn.DNN_TARGET_OPENCL_FP16, cv.dnn.DNN_TARGET_MYRIAD] else 1e-4
 
-            ref = np.array(ref, np.float32)
+            ref = mx.array(ref, mx.float32)
             refClassIds, testClassIds = ref[:, 1], out[:, 1]
             refScores, testScores = ref[:, 2], out[:, 2]
             refBoxes, testBoxes = ref[:, 3:], out[:, 3:]
@@ -348,7 +348,7 @@ class dnn_test(NewOpenCVTests):
             numInputs = 10
             inputs = []
             for _ in range(numInputs):
-                inputs.append(np.random.standard_normal([2, 6, 75, 113]).astype(np.float32))
+                inputs.append(mx.random.standard_normal([2, 6, 75, 113]).astype(mx.float32))
 
             # Run synchronously
             refs = []
@@ -432,8 +432,8 @@ class dnn_test(NewOpenCVTests):
             net.setPreferableTarget(target)
             src_shape = [1, 2, 5, 5]
             dst_shape = [1, 2, 3, 3]
-            inp = np.arange(0, np.prod(src_shape), dtype=np.float32).reshape(src_shape)
-            roi = np.empty(dst_shape, dtype=np.float32)
+            inp = mx.arange(0, mx.prod(src_shape), dtype=mx.float32).reshape(src_shape)
+            roi = mx.empty(dst_shape, dtype=mx.float32)
             net.setInput(inp, "input")
             net.setInput(roi, "roi")
             out = net.forward()
@@ -454,8 +454,8 @@ class dnn_test(NewOpenCVTests):
             raise unittest.SkipTest("Missing DNN test files (dnn/onnx/data/{input/output}_hidden_lstm.npy). "
                                     "Verify OPENCV_DNN_TEST_DATA_PATH configuration parameter.")
 
-        input = np.load(input_file)
-        gold_output = np.load(output_file)
+        input = mx.load(input_file)
+        gold_output = mx.load(output_file)
 
         for backend, target in self.dnnBackendsAndTargets:
             printParams(backend, target)
@@ -469,7 +469,7 @@ class dnn_test(NewOpenCVTests):
             net.setInput(input)
 
             # Case 0: test API `forward(const String& outputName = String()`
-            real_output = net.forward() # Retval is a np.array of shape [2, 5, 3]
+            real_output = net.forward() # Retval is a mx.array of shape [2, 5, 3]
             normAssert(self, real_output, gold_output, "Case 1", getDefaultThreshold(target))
 
             '''
@@ -477,25 +477,25 @@ class dnn_test(NewOpenCVTests):
             Normally Python users do not use in this way,
             but we have to test it since we design API in this way
             '''
-            # Case 1: a np.array with a string of output name.
+            # Case 1: a mx.array with a string of output name.
             #         It tests API `forward(OutputArrayOfArrays outputBlobs, const String& outputName = String()`
-            #         when outputBlobs is a np.array and we expect it to be the only output.
-            real_output = np.empty([2, 5, 3], dtype=np.float32)
-            real_output = net.forward(real_output, "237") # Retval is a tuple with a np.array of shape [2, 5, 3]
+            #         when outputBlobs is a mx.array and we expect it to be the only output.
+            real_output = mx.empty([2, 5, 3], dtype=mx.float32)
+            real_output = net.forward(real_output, "237") # Retval is a tuple with a mx.array of shape [2, 5, 3]
             normAssert(self, real_output, gold_output, "Case 1", getDefaultThreshold(target))
 
-            # Case 2: a tuple of np.array with a string of output name.
+            # Case 2: a tuple of mx.array with a string of output name.
             #         It tests API `forward(OutputArrayOfArrays outputBlobs, const String& outputName = String()`
-            #         when outputBlobs is a container of several np.array and we expect to save all outputs accordingly.
-            real_output = tuple(np.empty([2, 5, 3], dtype=np.float32))
-            real_output = net.forward(real_output, "237") # Retval is a tuple with a np.array of shape [2, 5, 3]
+            #         when outputBlobs is a container of several mx.array and we expect to save all outputs accordingly.
+            real_output = tuple(mx.empty([2, 5, 3], dtype=mx.float32))
+            real_output = net.forward(real_output, "237") # Retval is a tuple with a mx.array of shape [2, 5, 3]
             normAssert(self, real_output, gold_output, "Case 2", getDefaultThreshold(target))
 
-            # Case 3: a tuple of np.array with a string of output name.
+            # Case 3: a tuple of mx.array with a string of output name.
             #         It tests API `forward(OutputArrayOfArrays outputBlobs, const std::vector<String>& outBlobNames)`
-            real_output = tuple(np.empty([2, 5, 3], dtype=np.float32))
+            real_output = tuple(mx.empty([2, 5, 3], dtype=mx.float32))
             # Note that it does not support parsing a list , e.g. ["237"]
-            real_output = net.forward(real_output, ("237")) # Retval is a tuple with a np.array of shape [2, 5, 3]
+            real_output = net.forward(real_output, ("237")) # Retval is a tuple with a mx.array of shape [2, 5, 3]
             normAssert(self, real_output, gold_output, "Case 3", getDefaultThreshold(target))
 
     def test_set_param_3d(self):
@@ -503,8 +503,8 @@ class dnn_test(NewOpenCVTests):
         input_file = self.find_dnn_file('dnn/onnx/data/input_matmul_3d_init.npy')
         output_file = self.find_dnn_file('dnn/onnx/data/output_matmul_3d_init.npy')
 
-        input = np.load(input_file)
-        output = np.load(output_file)
+        input = mx.load(input_file)
+        output = mx.load(output_file)
 
         for backend, target in self.dnnBackendsAndTargets:
             printParams(backend, target)
@@ -540,7 +540,7 @@ class dnn_test(NewOpenCVTests):
         }
         net.addLayerToPrev("pool", "Pooling", cv.CV_32F, params)
 
-        inp = np.random.standard_normal([1, 2, 9, 12]).astype(np.float32)
+        inp = mx.random.standard_normal([1, 2, 9, 12]).astype(mx.float32)
         net.setInput(inp)
         out = net.forward()
         self.assertEqual(out.shape, (1, 2, 3, 4))

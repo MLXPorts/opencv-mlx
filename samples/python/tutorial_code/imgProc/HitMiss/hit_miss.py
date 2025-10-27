@@ -1,7 +1,7 @@
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 
-input_image = np.array((
+input_image = mx.array((
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 255, 255, 255, 0, 0, 0, 255],
     [0, 255, 255, 255, 0, 0, 0, 0],
@@ -11,7 +11,7 @@ input_image = np.array((
     [0,255, 0, 255, 0, 0, 255, 0],
     [0, 255, 255, 255, 0, 0, 0, 0]), dtype="uint8")
 
-kernel = np.array((
+kernel = mx.array((
         [0, 1, 0],
         [1, -1, 1],
         [0, 1, 0]), dtype="int")
@@ -20,7 +20,7 @@ output_image = cv.morphologyEx(input_image, cv.MORPH_HITMISS, kernel)
 
 rate = 50
 kernel = (kernel + 1) * 127
-kernel = np.uint8(kernel)
+kernel = mx.uint8(kernel)
 
 kernel = cv.resize(kernel, None, fx = rate, fy = rate, interpolation = cv.INTER_NEAREST)
 cv.imshow("kernel", kernel)

@@ -1,7 +1,7 @@
 from __future__ import print_function
 from __future__ import division
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 
 ## [Load image]
@@ -42,7 +42,7 @@ hist_w = 512
 hist_h = 400
 bin_w = int(round( hist_w/histSize ))
 
-histImage = np.zeros((hist_h, hist_w, 3), dtype=np.uint8)
+histImage = mx.zeros((hist_h, hist_w, 3), dtype=mx.uint8)
 ## [Draw the histograms for B, G and R]
 
 ## [Normalize the result to ( 0, histImage.rows )]

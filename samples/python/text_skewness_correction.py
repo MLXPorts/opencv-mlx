@@ -7,7 +7,7 @@ Usage:
         python text_skewness_correction.py --image "Image path"
 '''
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import sys
 import argparse

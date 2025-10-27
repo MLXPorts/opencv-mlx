@@ -1,14 +1,14 @@
 __all__ = []
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 from typing import TYPE_CHECKING, Any
 
 # Same as cv2.typing.NumPyArrayNumeric, but avoids circular dependencies
 if TYPE_CHECKING:
-    _NumPyArrayNumeric = np.ndarray[Any, np.dtype[np.integer[Any] | np.floating[Any]]]
+    _NumPyArrayNumeric = mx.ndarray[Any, mx.dtype[mx.integer[Any] | mx.floating[Any]]]
 else:
-    _NumPyArrayNumeric = np.ndarray
+    _NumPyArrayNumeric = mx.ndarray
 
 # NumPy documentation: https://numpy.org/doc/stable/user/basics.subclassing.html
 

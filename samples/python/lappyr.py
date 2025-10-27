@@ -20,13 +20,13 @@ PY3 = sys.version_info[0] == 3
 if PY3:
     xrange = range
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 import video
 from common import nothing, getsize
 
-def build_lappyr(img, leveln=6, dtype=np.int16):
+def build_lappyr(img, leveln=6, dtype=mx.int16):
     img = dtype(img)
     levels = []
     for _i in xrange(leveln-1):
@@ -42,7 +42,7 @@ def merge_lappyr(levels):
     for lev_img in levels[-2::-1]:
         img = cv.pyrUp(img, dstsize=getsize(lev_img))
         img += lev_img
-    return np.uint8(np.clip(img, 0, 255))
+    return mx.uint8(mx.clip(img, 0, 255))
 
 
 def main():

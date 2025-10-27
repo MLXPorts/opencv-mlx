@@ -1,6 +1,6 @@
 from __future__ import print_function
 from abc import ABCMeta, abstractmethod
-import numpy as np
+import mlx.core as mx
 import sys
 import os
 import argparse
@@ -35,7 +35,7 @@ class DataFetch(object):
 
     def get_batch(self, imgs_names):
         assert type(imgs_names) is list
-        batch = np.zeros((len(imgs_names), 3, self.frame_size, self.frame_size)).astype(np.float32)
+        batch = mx.zeros((len(imgs_names), 3, self.frame_size, self.frame_size)).astype(mx.float32)
         for i in range(len(imgs_names)):
             img_name = imgs_names[i]
             img_file = self.imgs_dir + img_name
@@ -59,7 +59,7 @@ class DataFetch(object):
 
 
 class MeanBlobFetch(DataFetch):
-    mean_blob = np.ndarray(())
+    mean_blob = mx.ndarray(())
 
     def __init__(self, frame_size, mean_blob_path, imgs_dir):
         self.imgs_dir = imgs_dir
@@ -67,7 +67,7 @@ class MeanBlobFetch(DataFetch):
         blob = caffe.proto.caffe_pb2.BlobProto()
         data = open(mean_blob_path, 'rb').read()
         blob.ParseFromString(data)
-        self.mean_blob = np.array(caffe.io.blobproto_to_array(blob))
+        self.mean_blob = mx.array(caffe.io.blobproto_to_array(blob))
         start = (self.mean_blob.shape[2] - self.frame_size) / 2
         stop = start + self.frame_size
         self.mean_blob = self.mean_blob[:, :, start:stop, start:stop][0]
@@ -80,7 +80,7 @@ class MeanChannelsFetch(MeanBlobFetch):
     def __init__(self, frame_size, imgs_dir):
         self.imgs_dir = imgs_dir
         self.frame_size = frame_size
-        self.mean_blob = np.ones((3, self.frame_size, self.frame_size)).astype(np.float32)
+        self.mean_blob = mx.ones((3, self.frame_size, self.frame_size)).astype(mx.float32)
         self.mean_blob[0] *= 104
         self.mean_blob[1] *= 117
         self.mean_blob[2] *= 123
@@ -90,7 +90,7 @@ class MeanValueFetch(MeanBlobFetch):
     def __init__(self, frame_size, imgs_dir, bgr_to_rgb):
         self.imgs_dir = imgs_dir
         self.frame_size = frame_size
-        self.mean_blob = np.ones((3, self.frame_size, self.frame_size)).astype(np.float32)
+        self.mean_blob = mx.ones((3, self.frame_size, self.frame_size)).astype(mx.float32)
         self.mean_blob *= 117
         self.bgr_to_rgb = bgr_to_rgb
 
@@ -98,7 +98,7 @@ class MeanValueFetch(MeanBlobFetch):
 def get_correct_answers(img_list, img_classes, net_output_blob):
     correct_answers = 0
     for i in range(len(img_list)):
-        indexes = np.argsort(net_output_blob[i])[-5:]
+        indexes = mx.argsort(net_output_blob[i])[-5:]
         correct_index = img_classes[img_list[i]]
         if correct_index in indexes:
             correct_answers += 1
@@ -220,13 +220,13 @@ class ClsAccEvaluation:
 
             for i in range(1, len(frameworks)):
                 log_str = frameworks[0].get_name() + " vs " + frameworks[i].get_name() + ':'
-                diff = np.abs(frameworks_out[0] - frameworks_out[i])
-                l1_diff = np.sum(diff) / diff.size
+                diff = mx.abs(frameworks_out[0] - frameworks_out[i])
+                l1_diff = mx.sum(diff) / diff.size
                 print(samples_handled, "L1 difference", log_str, l1_diff, file=self.log)
                 blobs_l1_diff[i] += l1_diff
                 blobs_l1_diff_count[i] += 1
-                if np.max(diff) > blobs_l_inf_diff[i]:
-                    blobs_l_inf_diff[i] = np.max(diff)
+                if mx.max(diff) > blobs_l_inf_diff[i]:
+                    blobs_l_inf_diff[i] = mx.max(diff)
                 print(samples_handled, "L_INF difference", log_str, blobs_l_inf_diff[i], file=self.log)
 
             self.log.flush()

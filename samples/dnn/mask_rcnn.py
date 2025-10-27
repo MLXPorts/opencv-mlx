@@ -1,6 +1,6 @@
 import cv2 as cv
 import argparse
-import numpy as np
+import mlx.core as mx
 
 parser = argparse.ArgumentParser(description=
         'Use this script to run Mask-RCNN object detection and semantic '
@@ -30,7 +30,7 @@ if args.classes:
 colors = None
 if args.colors:
     with open(args.colors, 'rt') as f:
-        colors = [np.array(color.split(' '), np.uint8) for color in f.read().rstrip('\n').split('\n')]
+        colors = [mx.array(color.split(' '), mx.uint8) for color in f.read().rstrip('\n').split('\n')]
 
 legend = None
 def showLegend(classes):
@@ -39,7 +39,7 @@ def showLegend(classes):
         blockHeight = 30
         assert(len(classes) == len(colors))
 
-        legend = np.zeros((blockHeight * len(colors), 200, 3), np.uint8)
+        legend = mx.zeros((blockHeight * len(colors), 200, 3), mx.uint8)
         for i in range(len(classes)):
             block = legend[i * blockHeight:(i + 1) * blockHeight]
             block[:,:] = colors[i]
@@ -99,9 +99,9 @@ while cv.waitKey(1) < 0:
     # Draw segmentation
     if not colors:
         # Generate colors
-        colors = [np.array([0, 0, 0], np.uint8)]
+        colors = [mx.array([0, 0, 0], mx.uint8)]
         for i in range(1, numClasses + 1):
-            colors.append((colors[i - 1] + np.random.randint(0, 256, [3], np.uint8)) / 2)
+            colors.append((colors[i - 1] + mx.random.randint(0, 256, [3], mx.uint8)) / 2)
         del colors[0]
 
     boxesToDraw = []
@@ -128,7 +128,7 @@ while cv.waitKey(1) < 0:
             mask = (classMask > 0.5)
 
             roi = frame[top:bottom+1, left:right+1][mask]
-            frame[top:bottom+1, left:right+1][mask] = (0.7 * colors[classId] + 0.3 * roi).astype(np.uint8)
+            frame[top:bottom+1, left:right+1][mask] = (0.7 * colors[classId] + 0.3 * roi).astype(mx.uint8)
 
     for box in boxesToDraw:
         drawBox(*box)

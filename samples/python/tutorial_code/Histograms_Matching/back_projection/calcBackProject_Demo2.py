@@ -1,6 +1,6 @@
 from __future__ import print_function
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 
 low = 20
@@ -25,7 +25,7 @@ def pickPoint(event, x, y, flags, param):
     connectivity = 8
     flags = connectivity + (newMaskVal << 8 ) + cv.FLOODFILL_FIXED_RANGE + cv.FLOODFILL_MASK_ONLY
 
-    mask2 = np.zeros((src.shape[0] + 2, src.shape[1] + 2), dtype=np.uint8)
+    mask2 = mx.zeros((src.shape[0] + 2, src.shape[1] + 2), dtype=mx.uint8)
     print('low:', low, 'up:', up)
     cv.floodFill(src, mask2, seed, newVal, (low, low, low), (up, up, up), flags)
     mask = mask2[1:-1,1:-1]

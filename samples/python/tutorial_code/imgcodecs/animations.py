@@ -1,5 +1,5 @@
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 
 def main(filename):
     ## [write_animation]
@@ -8,7 +8,7 @@ def main(filename):
         animation_to_save = cv.Animation()
 
         # Generate a base image with a specific color
-        image = np.full((128, 256, 4), (150, 150, 150, 255), dtype=np.uint8)
+        image = mx.full((128, 256, 4), (150, 150, 150, 255), dtype=mx.uint8)
         duration = 200
         frames = []
         durations = []

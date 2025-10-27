@@ -527,12 +527,12 @@ class NDArrayTypeNode(TypeNode):
         if self._use_numpy_generics:
             # NOTE: Shape is not fully supported yet
             dtype = self.dtype if self.dtype is not None else "numpy.generic"
-            return f"numpy.ndarray[_typing.Any, numpy.dtype[{dtype}]]"
-        return "numpy.ndarray"
+            return f"mlx.core.array[_typing.Any, {dtype}]"
+        return "mlx.core.array"
 
     @property
     def required_usage_imports(self) -> Generator[str, None, None]:
-        yield "import numpy"
+        yield "import mlx.core"
         # if self.shape is None:
         yield "import typing as _typing"
 

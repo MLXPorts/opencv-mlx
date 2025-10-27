@@ -6,7 +6,7 @@ MSER detector test
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 from tests_common import NewOpenCVTests
@@ -35,16 +35,16 @@ class mser_test(NewOpenCVTests):
         kDelta = 5
         mserExtractor = cv.MSER_create()
         mserExtractor.setDelta(kDelta)
-        np.random.seed(10)
+        mx.random.seed(10)
 
         for _i in range(100):
 
-            use_big_image = int(np.random.rand(1,1)*7) != 0
-            invert = int(np.random.rand(1,1)*2) != 0
-            binarize = int(np.random.rand(1,1)*5) != 0 if use_big_image else False
-            blur = int(np.random.rand(1,1)*2) != 0
-            thresh = thresharr[int(np.random.rand(1,1)*5)]
-            src0 = img if use_big_image else np.array(smallImg).astype('uint8')
+            use_big_image = int(mx.random.rand(1,1)*7) != 0
+            invert = int(mx.random.rand(1,1)*2) != 0
+            binarize = int(mx.random.rand(1,1)*5) != 0 if use_big_image else False
+            blur = int(mx.random.rand(1,1)*2) != 0
+            thresh = thresharr[int(mx.random.rand(1,1)*5)]
+            src0 = img if use_big_image else mx.array(smallImg).astype('uint8')
             src = src0.copy()
 
             kMinArea = 256 if use_big_image else 10

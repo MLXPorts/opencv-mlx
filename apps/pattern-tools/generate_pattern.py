@@ -21,7 +21,7 @@ python generate_pattern.py -o out.svg -r 11 -c 8 -T circles -s 20.0 -R 5.0 -u mm
 """
 
 import argparse
-import numpy as np
+import mlx.core as mx
 import json
 import gzip
 from svgfig import *
@@ -152,7 +152,7 @@ class PatternMaker:
     @staticmethod
     def _create_marker_bits(markerSize_bits, byteList):
 
-        marker = np.zeros((markerSize_bits+2, markerSize_bits+2))
+        marker = mx.zeros((markerSize_bits+2, markerSize_bits+2))
         bits = marker[1:markerSize_bits+1, 1:markerSize_bits+1]
 
         for i in range(markerSize_bits):

@@ -14,7 +14,7 @@ Keys:
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 from common import make_cmap
@@ -43,9 +43,9 @@ def main():
         mark = cv.Canny(img, thrs, 3*thrs)
         dist, labels = cv.distanceTransformWithLabels(~mark, cv.DIST_L2, 5)
         if voronoi:
-            vis = cm[np.uint8(labels)]
+            vis = cm[mx.uint8(labels)]
         else:
-            vis = cm[np.uint8(dist*2)]
+            vis = cm[mx.uint8(dist*2)]
         vis[mark != 0] = 255
         cv.imshow('distrans', vis)
 

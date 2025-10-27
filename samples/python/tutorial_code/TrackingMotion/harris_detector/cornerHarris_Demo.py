@@ -1,6 +1,6 @@
 from __future__ import print_function
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 
 source_window = 'Source image'
@@ -19,7 +19,7 @@ def cornerHarris_demo(val):
     dst = cv.cornerHarris(src_gray, blockSize, apertureSize, k)
 
     # Normalizing
-    dst_norm = np.empty(dst.shape, dtype=np.float32)
+    dst_norm = mx.empty(dst.shape, dtype=mx.float32)
     cv.normalize(dst, dst_norm, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
     dst_norm_scaled = cv.convertScaleAbs(dst_norm)
 

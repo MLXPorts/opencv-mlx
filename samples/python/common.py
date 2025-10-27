@@ -12,7 +12,7 @@ PY3 = sys.version_info[0] == 3
 if PY3:
     from functools import reduce
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 # built-in modules
@@ -36,7 +36,7 @@ def splitfn(fn):
 def anorm2(a):
     return (a*a).sum(-1)
 def anorm(a):
-    return np.sqrt( anorm2(a) )
+    return mx.sqrt( anorm2(a) )
 
 def homotrans(H, x, y):
     xs = H[0, 0]*x + H[0, 1]*y + H[0, 2]
@@ -45,38 +45,38 @@ def homotrans(H, x, y):
     return xs/s, ys/s
 
 def to_rect(a):
-    a = np.ravel(a)
+    a = mx.ravel(a)
     if len(a) == 2:
         a = (0, 0, a[0], a[1])
-    return np.array(a, np.float64).reshape(2, 2)
+    return mx.array(a, mx.float64).reshape(2, 2)
 
 def rect2rect_mtx(src, dst):
     src, dst = to_rect(src), to_rect(dst)
     cx, cy = (dst[1] - dst[0]) / (src[1] - src[0])
     tx, ty = dst[0] - src[0] * (cx, cy)
-    M = np.float64([[ cx,  0, tx],
+    M = mx.float64([[ cx,  0, tx],
                     [  0, cy, ty],
                     [  0,  0,  1]])
     return M
 
 
 def lookat(eye, target, up = (0, 0, 1)):
-    fwd = np.asarray(target, np.float64) - eye
+    fwd = mx.asarray(target, mx.float64) - eye
     fwd /= anorm(fwd)
-    right = np.cross(fwd, up)
+    right = mx.cross(fwd, up)
     right /= anorm(right)
-    down = np.cross(fwd, right)
-    R = np.float64([right, down, fwd])
-    tvec = -np.dot(R, eye)
+    down = mx.cross(fwd, right)
+    R = mx.float64([right, down, fwd])
+    tvec = -mx.dot(R, eye)
     return R, tvec
 
 def mtx2rvec(R):
-    w, u, vt = cv.SVDecomp(R - np.eye(3))
-    p = vt[0] + u[:,0]*w[0]    # same as np.dot(R, vt[0])
-    c = np.dot(vt[0], p)
-    s = np.dot(vt[1], p)
-    axis = np.cross(vt[0], vt[1])
-    return axis * np.arctan2(s, c)
+    w, u, vt = cv.SVDecomp(R - mx.eye(3))
+    p = vt[0] + u[:,0]*w[0]    # same as mx.dot(R, vt[0])
+    c = mx.dot(vt[0], p)
+    s = mx.dot(vt[1], p)
+    axis = mx.cross(vt[0], vt[1])
+    return axis * mx.arctan2(s, c)
 
 def draw_str(dst, target, s):
     x, y = target
@@ -123,7 +123,7 @@ cmap_data = { 'jet' : _jet_data }
 
 def make_cmap(name, n=256):
     data = cmap_data[name]
-    xs = np.linspace(0.0, 1.0, n)
+    xs = mx.linspace(0.0, 1.0, n)
     channels = []
     eps = 1e-6
     for ch_name in ['blue', 'green', 'red']:
@@ -132,9 +132,9 @@ def make_cmap(name, n=256):
         for x, y1, y2 in ch_data:
             xp += [x, x+eps]
             yp += [y1, y2]
-        ch = np.interp(xs, xp, yp)
+        ch = mx.interp(xs, xp, yp)
         channels.append(ch)
-    return np.uint8(np.array(channels).T*255)
+    return mx.uint8(mx.array(channels).T*255)
 
 def nothing(*arg, **kw):
     pass
@@ -170,15 +170,15 @@ class RectSelector:
         self.drag_start = None
         self.drag_rect = None
     def onmouse(self, event, x, y, flags, param):
-        x, y = np.int16([x, y]) # BUG
+        x, y = mx.int16([x, y]) # BUG
         if event == cv.EVENT_LBUTTONDOWN:
             self.drag_start = (x, y)
             return
         if self.drag_start:
             if flags & cv.EVENT_FLAG_LBUTTON:
                 xo, yo = self.drag_start
-                x0, y0 = np.minimum([xo, yo], [x, y])
-                x1, y1 = np.maximum([xo, yo], [x, y])
+                x0, y0 = mx.minimum([xo, yo], [x, y])
+                x1, y1 = mx.maximum([xo, yo], [x, y])
                 self.drag_rect = None
                 if x1-x0 > 0 and y1-y0 > 0:
                     self.drag_rect = (x0, y0, x1, y1)
@@ -219,17 +219,17 @@ def mosaic(w, imgs):
         img0 = next(imgs)
     else:
         img0 = imgs.next()
-    pad = np.zeros_like(img0)
+    pad = mx.zeros_like(img0)
     imgs = it.chain([img0], imgs)
     rows = grouper(w, imgs, pad)
-    return np.vstack(list(map(np.hstack, rows)))
+    return mx.vstack(list(map(mx.hstack, rows)))
 
 def getsize(img):
     h, w = img.shape[:2]
     return w, h
 
 def mdot(*args):
-    return reduce(np.dot, args)
+    return reduce(mx.dot, args)
 
 def draw_keypoints(vis, keypoints, color = (0, 255, 255)):
     for kp in keypoints:

@@ -7,7 +7,7 @@ python aruco_detect_board_charuco.py -w=5 -h=7 -sl=0.04 -ml=0.02 -d=10 -c=../dat
 """
 
 import argparse
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import sys
 
@@ -87,7 +87,7 @@ def main():
         sys.exit(0)
 
     while image is not None:
-        image_copy = np.copy(image)
+        image_copy = mx.copy(image)
         charuco_corners, charuco_ids, marker_corners, marker_ids = charuco_detector.detectBoard(image)
         if not (marker_ids is None) and len(marker_ids) > 0:
             cv.aruco.drawDetectedMarkers(image_copy, marker_corners)

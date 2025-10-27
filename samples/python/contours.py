@@ -17,11 +17,11 @@ PY3 = sys.version_info[0] == 3
 if PY3:
     xrange = range
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 def make_image():
-    img = np.zeros((500, 500), np.uint8)
+    img = mx.zeros((500, 500), mx.uint8)
     black, white = 0, 255
     for i in xrange(6):
         dx = int((i%2)*250 - 30)
@@ -29,10 +29,10 @@ def make_image():
 
         if i == 0:
             for j in xrange(11):
-                angle = (j+5)*np.pi/21
-                c, s = np.cos(angle), np.sin(angle)
-                x1, y1 = np.int32([dx+100+j*10-80*c, dy+100-90*s])
-                x2, y2 = np.int32([dx+100+j*10-30*c, dy+100-30*s])
+                angle = (j+5)*mx.pi/21
+                c, s = mx.cos(angle), mx.sin(angle)
+                x1, y1 = mx.int32([dx+100+j*10-80*c, dy+100-90*s])
+                x2, y2 = mx.int32([dx+100+j*10-30*c, dy+100-30*s])
                 cv.line(img, (x1, y1), (x2, y2), white)
 
         cv.ellipse( img, (dx+150, dy+100), (100,70), 0, 0, 360, white, -1 )
@@ -56,7 +56,7 @@ def main():
     contours = [cv.approxPolyDP(cnt, 3, True) for cnt in contours0]
 
     def update(levels):
-        vis = np.zeros((h, w, 3), np.uint8)
+        vis = mx.zeros((h, w, 3), mx.uint8)
         levels = levels - 3
         cv.drawContours( vis, contours, (-1, 2)[levels <= 0], (128,255,255),
             3, cv.LINE_AA, hierarchy, abs(levels) )

@@ -21,7 +21,7 @@ ESC - exit
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 import video
@@ -52,7 +52,7 @@ class App:
 
             if len(self.tracks) > 0:
                 img0, img1 = self.prev_gray, frame_gray
-                p0 = np.float32([tr[-1] for tr in self.tracks]).reshape(-1, 1, 2)
+                p0 = mx.float32([tr[-1] for tr in self.tracks]).reshape(-1, 1, 2)
                 p1, _st, _err = cv.calcOpticalFlowPyrLK(img0, img1, p0, None, **lk_params)
                 p0r, _st, _err = cv.calcOpticalFlowPyrLK(img1, img0, p1, None, **lk_params)
                 d = abs(p0-p0r).reshape(-1, 2).max(-1)
@@ -67,17 +67,17 @@ class App:
                     new_tracks.append(tr)
                     cv.circle(vis, (int(x), int(y)), 2, (0, 255, 0), -1)
                 self.tracks = new_tracks
-                cv.polylines(vis, [np.int32(tr) for tr in self.tracks], False, (0, 255, 0))
+                cv.polylines(vis, [mx.int32(tr) for tr in self.tracks], False, (0, 255, 0))
                 draw_str(vis, (20, 20), 'track count: %d' % len(self.tracks))
 
             if self.frame_idx % self.detect_interval == 0:
-                mask = np.zeros_like(frame_gray)
+                mask = mx.zeros_like(frame_gray)
                 mask[:] = 255
-                for x, y in [np.int32(tr[-1]) for tr in self.tracks]:
+                for x, y in [mx.int32(tr[-1]) for tr in self.tracks]:
                     cv.circle(mask, (x, y), 5, 0, -1)
                 p = cv.goodFeaturesToTrack(frame_gray, mask = mask, **feature_params)
                 if p is not None:
-                    for x, y in np.float32(p).reshape(-1, 2):
+                    for x, y in mx.float32(p).reshape(-1, 2):
                         self.tracks.append([(x, y)])
 
 

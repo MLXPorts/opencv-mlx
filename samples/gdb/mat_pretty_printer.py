@@ -1,9 +1,9 @@
 import gdb
-import numpy as np
+import mlx.core as mx
 from enum import Enum
 
 np.set_printoptions(suppress=True)  # prevent numpy exponential notation on print, default False
-# np.set_printoptions(threshold=sys.maxsize)
+# mx.set_printoptions(threshold=sys.maxsize)
 
 
 def conv(obj, t):
@@ -62,21 +62,21 @@ class Flags:
         ret = None
 
         if depth == Depth.CV_8U:
-            ret = (np.uint8, 'uint8_t')
+            ret = (mx.uint8, 'uint8_t')
         elif depth == Depth.CV_8S:
-            ret = (np.int8, 'int8_t')
+            ret = (mx.int8, 'int8_t')
         elif depth == Depth.CV_16U:
-            ret = (np.uint16, 'uint16_t')
+            ret = (mx.uint16, 'uint16_t')
         elif depth == Depth.CV_16S:
-            ret = (np.int16, 'int16_t')
+            ret = (mx.int16, 'int16_t')
         elif depth == Depth.CV_32S:
-            ret = (np.int32, 'int32_t')
+            ret = (mx.int32, 'int32_t')
         elif depth == Depth.CV_32F:
-            ret = (np.float32, 'float')
+            ret = (mx.float32, 'float')
         elif depth == Depth.CV_64F:
-            ret = (np.float64, 'double')
+            ret = (mx.float64, 'double')
         elif depth == Depth.CV_16F:
-            ret = (np.float16, 'float16')
+            ret = (mx.float16, 'float16')
 
         return ret
 
@@ -111,7 +111,7 @@ class Size:
         return int((self.ptr - 1).dereference())
 
     def to_numpy(self):
-        return np.array([int(self.ptr[i]) for i in range(self.dims())], dtype=np.int64)
+        return mx.array([int(self.ptr[i]) for i in range(self.dims())], dtype=mx.int64)
 
     def __iter__(self):
         return iter({'size': stri(self.to_numpy())}.items())
@@ -120,40 +120,40 @@ class Size:
 class Mat:
     def __init__(self, m, size, flags):
         (dtype, ctype) = flags.dtype()
-        elsize = np.dtype(dtype).itemsize
+        elsize = mx.dtype(dtype).itemsize
 
         shape = size.to_numpy()
-        steps = np.asarray([int(m['step']['p'][i]) for i in range(len(shape))], dtype=np.int64)
+        steps = mx.asarray([int(m['step']['p'][i]) for i in range(len(shape))], dtype=mx.int64)
 
         ptr = m['data']
         # either we are default-constructed or sizes are zero
-        if int(ptr) == 0 or np.prod(shape * steps) == 0:
-            self.mat = np.array([])
+        if int(ptr) == 0 or mx.prod(shape * steps) == 0:
+            self.mat = mx.array([])
             self.view = self.mat
             return
 
         # we don't want to show excess brackets
         if flags.channels() != 1:
-            shape = np.append(shape, flags.channels())
-            steps = np.append(steps, elsize)
+            shape = mx.append(shape, flags.channels())
+            steps = mx.append(steps, elsize)
 
         # get the length of contiguous array from data to the last element of the matrix
-        length = 1 + np.sum((shape - 1) * steps) // elsize
+        length = 1 + mx.sum((shape - 1) * steps) // elsize
 
-        if dtype != np.float16:
+        if dtype != mx.float16:
             # read all elements into self.mat
             ctype = gdb.lookup_type(ctype)
             ptr = ptr.cast(ctype.array(length - 1).pointer()).dereference()
-            self.mat = np.array([ptr[i] for i in range(length)], dtype=dtype)
+            self.mat = mx.array([ptr[i] for i in range(length)], dtype=dtype)
         else:
             # read as uint16_t and then reinterpret the bytes as float16
             u16 = gdb.lookup_type('uint16_t')
             ptr = ptr.cast(u16.array(length - 1).pointer()).dereference()
-            self.mat = np.array([ptr[i] for i in range(length)], dtype=np.uint16)
-            self.mat = self.mat.view(np.float16)
+            self.mat = mx.array([ptr[i] for i in range(length)], dtype=mx.uint16)
+            self.mat = self.mat.view(mx.float16)
 
         # numpy will do the heavy lifting of strided access
-        self.view = np.lib.stride_tricks.as_strided(self.mat, shape=shape, strides=steps)
+        self.view = mx.lib.stride_tricks.as_strided(self.mat, shape=shape, strides=steps)
 
     def __iter__(self):
         return iter({'data': stri(self.view)}.items())

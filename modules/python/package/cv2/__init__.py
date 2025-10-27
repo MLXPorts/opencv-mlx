@@ -8,12 +8,13 @@ import sys
 __all__ = []
 
 try:
-    import numpy
-    import numpy.core.multiarray
+    import mlx.core as mx
+    # MLX compatibility layer for NumPy-like operations
+    numpy = mx
 except ImportError:
-    print('OpenCV bindings requires "numpy" package.')
+    print('OpenCV-MLX bindings requires "mlx" package.')
     print('Install it via command:')
-    print('    pip install numpy')
+    print('    pip install mlx')
     raise
 
 # TODO

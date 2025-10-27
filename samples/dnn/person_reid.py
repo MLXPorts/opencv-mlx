@@ -15,7 +15,7 @@ Copyright (C) 2020-2021, SUSTech.
 '''
 import argparse
 import os.path
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 backends = (cv.dnn.DNN_BACKEND_DEFAULT,
@@ -48,10 +48,10 @@ def preprocess(images, height, width):
         image = cv.resize(image, (width, height))
         img_list.append(image[:, :, ::-1])
 
-    images = np.array(img_list)
+    images = mx.array(img_list)
     images = (images / 255.0 - MEAN) / STD
 
-    input = cv.dnn.blobFromImages(images.astype(np.float32), ddepth = cv.CV_32F)
+    input = cv.dnn.blobFromImages(images.astype(mx.float32), ddepth = cv.CV_32F)
     return input
 
 def extract_feature(img_dir, model_path, batch_size = 32, resize_h = 384, resize_w = 128, backend=cv.dnn.DNN_BACKEND_OPENCV, target=cv.dnn.DNN_TARGET_CPU):
@@ -81,7 +81,7 @@ def extract_feature(img_dir, model_path, batch_size = 32, resize_h = 384, resize
         feat_list.append(feat)
         count += batch_size
 
-    feats = np.concatenate(feat_list, axis = 0)
+    feats = mx.concatenate(feat_list, axis = 0)
     return feats, path_list
 
 def run_net(inputs, model_path, backend=cv.dnn.DNN_BACKEND_OPENCV, target=cv.dnn.DNN_TARGET_CPU):
@@ -97,7 +97,7 @@ def run_net(inputs, model_path, backend=cv.dnn.DNN_BACKEND_OPENCV, target=cv.dnn
     net.setPreferableTarget(target)
     net.setInput(inputs)
     out = net.forward()
-    out = np.reshape(out, (out.shape[0], out.shape[1]))
+    out = mx.reshape(out, (out.shape[0], out.shape[1]))
     return out
 
 def read_data(path_list):
@@ -120,8 +120,8 @@ def normalize(nparray, order=2, axis=0):
     :param order: order of the norm
     :param axis: the axis of x along which to compute the vector norms
     """
-    norm = np.linalg.norm(nparray, ord=order, axis=axis, keepdims=True)
-    return nparray / (norm + np.finfo(np.float32).eps)
+    norm = mx.linalg.norm(nparray, ord=order, axis=axis, keepdims=True)
+    return nparray / (norm + mx.finfo(mx.float32).eps)
 
 def similarity(array1, array2):
     """
@@ -133,7 +133,7 @@ def similarity(array1, array2):
     """
     array1 = normalize(array1, axis=1)
     array2 = normalize(array2, axis=1)
-    dist = np.matmul(array1, array2.T)
+    dist = mx.matmul(array1, array2.T)
     return dist
 
 def topk(query_feat, gallery_feat, topk = 5):
@@ -144,7 +144,7 @@ def topk(query_feat, gallery_feat, topk = 5):
     :param topk: number of gallery images to return
     """
     sim = similarity(query_feat, gallery_feat)
-    index = np.argsort(-sim, axis = 1)
+    index = mx.argsort(-sim, axis = 1)
     return [i[0:int(topk)] for i in index]
 
 def drawRankList(query_name, gallery_list, output_size = (128, 384)):
@@ -178,7 +178,7 @@ def drawRankList(query_name, gallery_list, output_size = (128, 384)):
         gallery_img = addBorder(gallery_img, [255, 255, 255])
         cv.putText(gallery_img, 'G%02d'%i, (10, 30), cv.FONT_HERSHEY_COMPLEX, 1., (0,255,0), 2)
         gallery_img_list.append(gallery_img)
-    ret = np.concatenate([query_img] + gallery_img_list, axis = 1)
+    ret = mx.concatenate([query_img] + gallery_img_list, axis = 1)
     return ret
 
 

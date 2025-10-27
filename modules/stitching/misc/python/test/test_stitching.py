@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 
 from tests_common import NewOpenCVTests
 
@@ -170,8 +170,8 @@ class stitching_seam_finder_graph_cuts(NewOpenCVTests):
         images = [cv.resize(img, [100, 100]) for img in images]
 
         finder = cv.detail_GraphCutSeamFinder('COST_COLOR_GRAD')
-        masks = [cv.UMat(255 * np.ones((img.shape[0], img.shape[1]), np.uint8)) for img in images]
-        images_f = [img.astype(np.float32) for img in images]
+        masks = [cv.UMat(255 * mx.ones((img.shape[0], img.shape[1]), mx.uint8)) for img in images]
+        images_f = [img.astype(mx.float32) for img in images]
         masks_warped = finder.find(images_f, [(0, 0), (75, 0), (150, 0)], masks)
 
         self.assertIsNotNone(masks_warped)

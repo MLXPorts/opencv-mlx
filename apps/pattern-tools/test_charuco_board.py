@@ -61,7 +61,7 @@ class aruco_objdetect_test(NewOpenCVTests):
                     for key_svg in marker_corners_svg_map.keys():
                         marker_svg = marker_corners_svg_map[key_svg]
                         marker_cv = marker_corners_cv_map[key_svg]
-                        np.testing.assert_allclose(marker_svg, marker_cv, 0.1, 0.1)
+                        mx.testing.assert_allclose(marker_svg, marker_cv, 0.1, 0.1)
                 finally:
                     if os.path.exists(filesvg):
                         os.remove(filesvg)
@@ -118,7 +118,7 @@ class aruco_objdetect_test(NewOpenCVTests):
                     for key_svg in marker_corners_svg_map.keys():
                         marker_svg = marker_corners_svg_map[key_svg]
                         marker_cv = marker_corners_cv_map[key_svg]
-                        np.testing.assert_allclose(marker_svg, marker_cv, 0.1, 0.1)
+                        mx.testing.assert_allclose(marker_svg, marker_cv, 0.1, 0.1)
                 finally:
                     if os.path.exists(filesvg):
                         os.remove(filesvg)

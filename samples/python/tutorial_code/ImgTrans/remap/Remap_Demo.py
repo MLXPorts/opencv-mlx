@@ -1,6 +1,6 @@
 from __future__ import print_function
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 
 ## [Update]
@@ -43,8 +43,8 @@ if src is None:
 ## [Load]
 
 ## [Create]
-map_x = np.zeros((src.shape[0], src.shape[1]), dtype=np.float32)
-map_y = np.zeros((src.shape[0], src.shape[1]), dtype=np.float32)
+map_x = mx.zeros((src.shape[0], src.shape[1]), dtype=mx.float32)
+map_y = mx.zeros((src.shape[0], src.shape[1]), dtype=mx.float32)
 ## [Create]
 
 ## [Window]

@@ -8,7 +8,7 @@ Test for disctrete fourier transform (dft)
 from __future__ import print_function
 
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import sys
 
 from tests_common import NewOpenCVTests
@@ -20,13 +20,13 @@ class dft_test(NewOpenCVTests):
         eps = 0.001
 
         #test direct transform
-        refDft = np.fft.fft2(img)
-        refDftShift = np.fft.fftshift(refDft)
-        refMagnitide = np.log(1.0 + np.abs(refDftShift))
+        refDft = mx.fft.fft2(img)
+        refDftShift = mx.fft.fftshift(refDft)
+        refMagnitide = mx.log(1.0 + mx.abs(refDftShift))
 
-        testDft = cv.dft(np.float32(img),flags = cv.DFT_COMPLEX_OUTPUT)
-        testDftShift = np.fft.fftshift(testDft)
-        testMagnitude = np.log(1.0 + cv.magnitude(testDftShift[:,:,0], testDftShift[:,:,1]))
+        testDft = cv.dft(mx.float32(img),flags = cv.DFT_COMPLEX_OUTPUT)
+        testDftShift = mx.fft.fftshift(testDft)
+        testMagnitude = mx.log(1.0 + cv.magnitude(testDftShift[:,:,0], testDftShift[:,:,1]))
 
         refMagnitide = cv.normalize(refMagnitide, 0.0, 1.0, cv.NORM_MINMAX)
         testMagnitude = cv.normalize(testMagnitude, 0.0, 1.0, cv.NORM_MINMAX)
@@ -34,8 +34,8 @@ class dft_test(NewOpenCVTests):
         self.assertLess(cv.norm(refMagnitide - testMagnitude), eps)
 
         #test inverse transform
-        img_back = np.fft.ifft2(refDft)
-        img_back = np.abs(img_back)
+        img_back = mx.fft.ifft2(refDft)
+        img_back = mx.abs(img_back)
 
         img_backTest = cv.idft(testDft)
         img_backTest = cv.magnitude(img_backTest[:,:,0], img_backTest[:,:,1])

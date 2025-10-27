@@ -8,7 +8,7 @@ reads distorted images, calculates the calibration and write undistorted images
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 from tests_common import NewOpenCVTests
@@ -25,8 +25,8 @@ class calibration_test(NewOpenCVTests):
 
         square_size = 1.0
         pattern_size = (9, 6)
-        pattern_points = np.zeros((np.prod(pattern_size), 3), np.float32)
-        pattern_points[:, :2] = np.indices(pattern_size).T.reshape(-1, 2)
+        pattern_points = mx.zeros((mx.prod(pattern_size), 3), mx.float32)
+        pattern_points[:, :2] = mx.indices(pattern_size).T.reshape(-1, 2)
         pattern_points *= square_size
 
         obj_points = []
@@ -68,28 +68,28 @@ class calibration_test(NewOpenCVTests):
         self.assertLess(cv.norm(dist_coefs - distCoeffsTest, cv.NORM_L1), normDistEps)
 
     def test_projectPoints(self):
-        objectPoints = np.array([[181.24588 ,  87.80361 ,  11.421074],
+        objectPoints = mx.array([[181.24588 ,  87.80361 ,  11.421074],
             [ 87.17948 , 184.75563 ,  37.223446],
-            [ 22.558456,  45.495266, 246.05797 ]], dtype=np.float32)
-        rvec = np.array([[ 0.9357548 , -0.28316498,  0.21019171],
+            [ 22.558456,  45.495266, 246.05797 ]], dtype=mx.float32)
+        rvec = mx.array([[ 0.9357548 , -0.28316498,  0.21019171],
             [ 0.30293274,  0.9505806 , -0.06803132],
-            [-0.18054008,  0.12733458,  0.9752903 ]], dtype=np.float32)
-        tvec = np.array([ 69.32692 ,  17.602057, 135.77672 ], dtype=np.float32)
-        cameraMatrix = np.array([[214.0047  ,  26.98735 , 253.37799 ],
+            [-0.18054008,  0.12733458,  0.9752903 ]], dtype=mx.float32)
+        tvec = mx.array([ 69.32692 ,  17.602057, 135.77672 ], dtype=mx.float32)
+        cameraMatrix = mx.array([[214.0047  ,  26.98735 , 253.37799 ],
             [189.8172  ,  10.038101,  18.862494],
-            [114.07123 , 200.87277 , 194.56332 ]], dtype=np.float32)
-        distCoeffs = distCoeffs = np.zeros((4, 1), dtype=np.float32)
+            [114.07123 , 200.87277 , 194.56332 ]], dtype=mx.float32)
+        distCoeffs = distCoeffs = mx.zeros((4, 1), dtype=mx.float32)
 
         imagePoints, jacobian = cv.projectPoints(objectPoints, rvec, tvec, cameraMatrix, distCoeffs)
         self.assertTrue(imagePoints is not None)
         self.assertTrue(jacobian is not None)
 
     def test_sampsonDistance_valid2D(self):
-        pt1 = (np.random.rand(3, 10) * 256).astype(np.float64)
-        pt2 = (np.random.rand(3, 10) * 256).astype(np.float64)
-        F = (np.random.rand(3, 3) * 256).astype(np.float64)
+        pt1 = (mx.random.rand(3, 10) * 256).astype(mx.float64)
+        pt2 = (mx.random.rand(3, 10) * 256).astype(mx.float64)
+        F = (mx.random.rand(3, 3) * 256).astype(mx.float64)
         dist = cv.sampsonDistance(pt1, pt2, F)
-        self.assertTrue(isinstance(dist, (float, np.floating)))
+        self.assertTrue(isinstance(dist, (float, mx.floating)))
         self.assertGreaterEqual(dist, 0.0)
 
 if __name__ == '__main__':

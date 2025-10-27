@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import os
 import sys
@@ -64,7 +64,7 @@ try:
             self.iorg = (150, 150)
             img_path = self.find_file('cv/face/david2.jpg', [os.environ.get('OPENCV_TEST_DATA_PATH')])
             self.img = cv.resize(cv.imread(img_path), (50, 50))
-            self.alpha = np.full(self.img.shape[:2], 0.8, dtype=np.float32)
+            self.alpha = mx.full(self.img.shape[:2], 0.8, dtype=mx.float32)
 
             # Mosaic
             self.mos = (100, 100, 100, 100)
@@ -101,15 +101,15 @@ try:
             x, y = org
             h, w, _ = img.shape
             roi_img = background[x:x+w, y:y+h, :]
-            img32f_w = cv.merge([alpha] * 3).astype(np.float32)
-            roi32f_w = np.full(roi_img.shape, 1.0, dtype=np.float32)
+            img32f_w = cv.merge([alpha] * 3).astype(mx.float32)
+            roi32f_w = mx.full(roi_img.shape, 1.0, dtype=mx.float32)
             roi32f_w -= img32f_w
-            img32f = (img / 255).astype(np.float32)
-            roi32f = (roi_img / 255).astype(np.float32)
+            img32f = (img / 255).astype(mx.float32)
+            roi32f = (roi_img / 255).astype(mx.float32)
             cv.multiply(img32f, img32f_w, dst=img32f)
             cv.multiply(roi32f, roi32f_w, dst=roi32f)
             roi32f += img32f
-            roi_img[...] = np.round(roi32f * 255)
+            roi_img[...] = mx.round(roi32f * 255)
 
         # This is quite naive implementations used as a simple reference
         # doesn't consider corner cases.
@@ -127,7 +127,7 @@ try:
             cv.putText(img, self.text, self.org, self.ff, self.fs, self.tcolor, self.tthick, self.tlt, self.blo)
             cv.circle(img, self.center, self.radius, self.ccolor, self.cthick, self.clt, self.cshift)
             cv.line(img, self.pt1, self.pt2, self.lcolor, self.lthick, self.llt, self.lshift)
-            cv.fillPoly(img, np.expand_dims(np.array([self.pts]), axis=0), self.pcolor, self.plt, self.pshift)
+            cv.fillPoly(img, mx.expand_dims(mx.array([self.pts]), axis=0), self.pcolor, self.plt, self.pshift)
             self.draw_mosaic(img, self.mos, self.cell_sz, self.decim)
             self.blend_img(img, self.iorg, self.img, self.alpha)
 
@@ -137,14 +137,14 @@ try:
             cv.putText(yuv, self.text, self.org, self.ff, self.fs, self.cvt_bgr_to_yuv_color(self.tcolor), self.tthick, self.tlt, self.blo)
             cv.circle(yuv, self.center, self.radius, self.cvt_bgr_to_yuv_color(self.ccolor), self.cthick, self.clt, self.cshift)
             cv.line(yuv, self.pt1, self.pt2, self.cvt_bgr_to_yuv_color(self.lcolor), self.lthick, self.llt, self.lshift)
-            cv.fillPoly(yuv, np.expand_dims(np.array([self.pts]), axis=0), self.cvt_bgr_to_yuv_color(self.pcolor), self.plt, self.pshift)
+            cv.fillPoly(yuv, mx.expand_dims(mx.array([self.pts]), axis=0), self.cvt_bgr_to_yuv_color(self.pcolor), self.plt, self.pshift)
             self.draw_mosaic(yuv, self.mos, self.cell_sz, self.decim)
             self.blend_img(yuv, self.iorg, cv.cvtColor(self.img, cv.COLOR_BGR2YUV), self.alpha)
             self.cvt_yuv_to_nv12(yuv, y_plane, uv_plane)
 
         def test_render_primitives_on_bgr_graph(self):
-            expected = np.zeros(self.size, dtype=np.uint8)
-            actual = np.array(expected, copy=True)
+            expected = mx.zeros(self.size, dtype=mx.uint8)
+            actual = mx.array(expected, copy=True)
 
             # OpenCV
             self.render_primitives_bgr_ref(expected)
@@ -161,8 +161,8 @@ try:
             self.assertEqual(0.0, cv.norm(expected, actual, cv.NORM_INF))
 
         def test_render_primitives_on_bgr_function(self):
-            expected = np.zeros(self.size, dtype=np.uint8)
-            actual = np.array(expected, copy=True)
+            expected = mx.zeros(self.size, dtype=mx.uint8)
+            actual = mx.array(expected, copy=True)
 
             # OpenCV
             self.render_primitives_bgr_ref(expected)
@@ -172,11 +172,11 @@ try:
             self.assertEqual(0.0, cv.norm(expected, actual, cv.NORM_INF))
 
         def test_render_primitives_on_nv12_graph(self):
-            y_expected = np.zeros((self.size[0], self.size[1], 1), dtype=np.uint8)
-            uv_expected = np.zeros((self.size[0] // 2, self.size[1] // 2, 2), dtype=np.uint8)
+            y_expected = mx.zeros((self.size[0], self.size[1], 1), dtype=mx.uint8)
+            uv_expected = mx.zeros((self.size[0] // 2, self.size[1] // 2, 2), dtype=mx.uint8)
 
-            y_actual = np.array(y_expected, copy=True)
-            uv_actual = np.array(uv_expected, copy=True)
+            y_actual = mx.array(y_expected, copy=True)
+            uv_actual = mx.array(uv_expected, copy=True)
 
             # OpenCV
             self.render_primitives_nv12_ref(y_expected, uv_expected)
@@ -194,11 +194,11 @@ try:
             self.assertEqual(0.0, cv.norm(uv_expected, uv_actual, cv.NORM_INF))
 
         def test_render_primitives_on_nv12_function(self):
-            y_expected = np.zeros((self.size[0], self.size[1], 1), dtype=np.uint8)
-            uv_expected = np.zeros((self.size[0] // 2, self.size[1] // 2, 2), dtype=np.uint8)
+            y_expected = mx.zeros((self.size[0], self.size[1], 1), dtype=mx.uint8)
+            uv_expected = mx.zeros((self.size[0] // 2, self.size[1] // 2, 2), dtype=mx.uint8)
 
-            y_actual = np.array(y_expected, copy=True)
-            uv_actual = np.array(uv_expected, copy=True)
+            y_actual = mx.array(y_expected, copy=True)
+            uv_actual = mx.array(uv_expected, copy=True)
 
             # OpenCV
             self.render_primitives_nv12_ref(y_expected, uv_expected)

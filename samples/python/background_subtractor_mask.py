@@ -7,7 +7,7 @@ aswell as pass through of a known foreground parameter
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 def main():
@@ -32,7 +32,7 @@ def main():
         x = 100 + (frame_count % 10) * 3
 
         frame = cv.resize(frame, (640, 480))
-        aKnownForegroundMask = np.zeros(frame.shape[:2], dtype=np.uint8)
+        aKnownForegroundMask = mx.zeros(frame.shape[:2], dtype=mx.uint8)
 
         # Allow for models to "settle"/learn
         if frame_count > show_count:

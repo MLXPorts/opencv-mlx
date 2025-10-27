@@ -4,7 +4,7 @@
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 from numpy import pi, sin, cos
@@ -25,7 +25,7 @@ class TestSceneRender():
         if bgImg is not None:
             self.sceneBg = bgImg.copy()
         else:
-            self.sceneBg = np.zeros((defaultSize, defaultSize,3), np.uint8)
+            self.sceneBg = mx.zeros((defaultSize, defaultSize,3), mx.uint8)
 
         self.w = self.sceneBg.shape[0]
         self.h = self.sceneBg.shape[1]
@@ -37,7 +37,7 @@ class TestSceneRender():
             self.xAmpl = self.sceneBg.shape[0] - (self.center[0] + fgImg.shape[0])
             self.yAmpl = self.sceneBg.shape[1] - (self.center[1] + fgImg.shape[1])
 
-        self.initialRect = np.array([ (self.h/2, self.w/2), (self.h/2, self.w/2 + self.w/10),
+        self.initialRect = mx.array([ (self.h/2, self.w/2), (self.h/2, self.w/2 + self.w/10),
          (self.h/2 + self.h/10, self.w/2 + self.w/10), (self.h/2 + self.h/10, self.w/2)]).astype(int)
         self.currentRect = self.initialRect
 
@@ -54,14 +54,14 @@ class TestSceneRender():
     def getRectInTime(self, time):
 
         if self.foreground is not None:
-            tmp = np.array(self.center) + np.array((self.getXOffset(time), self.getYOffset(time)))
+            tmp = mx.array(self.center) + mx.array((self.getXOffset(time), self.getYOffset(time)))
             x0, y0 = tmp
             x1, y1 = tmp + self.foreground.shape[0:2]
-            return np.array([y0, x0, y1, x1])
+            return mx.array([y0, x0, y1, x1])
         else:
-            x0, y0 = self.initialRect[0] + np.array((self.getXOffset(time), self.getYOffset(time)))
-            x1, y1 = self.initialRect[2] + np.array((self.getXOffset(time), self.getYOffset(time)))
-            return np.array([y0, x0, y1, x1])
+            x0, y0 = self.initialRect[0] + mx.array((self.getXOffset(time), self.getYOffset(time)))
+            x1, y1 = self.initialRect[2] + mx.array((self.getXOffset(time), self.getYOffset(time)))
+            return mx.array([y0, x0, y1, x1])
 
     def getCurrentRect(self):
 
@@ -71,11 +71,11 @@ class TestSceneRender():
             y0 = self.currentCenter[1]
             x1 = self.currentCenter[0] + self.foreground.shape[0]
             y1 = self.currentCenter[1] + self.foreground.shape[1]
-            return np.array([y0, x0, y1, x1])
+            return mx.array([y0, x0, y1, x1])
         else:
             x0, y0 = self.currentRect[0]
             x1, y1 = self.currentRect[2]
-            return np.array([x0, y0, x1, y1])
+            return mx.array([x0, y0, x1, y1])
 
     def getNextFrame(self):
         img = self.sceneBg.copy()

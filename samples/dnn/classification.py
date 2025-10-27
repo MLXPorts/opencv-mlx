@@ -1,7 +1,7 @@
 import argparse
 
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 from common import *
 
 
@@ -90,7 +90,7 @@ def main(func_args=None):
 
         blob = cv.dnn.blobFromImage(frame, args.scale, (inpWidth, inpHeight), args.mean, args.rgb, crop=args.crop)
         if args.std:
-            blob[0] /= np.asarray(args.std, dtype=np.float32).reshape(3, 1, 1)
+            blob[0] /= mx.asarray(args.std, dtype=mx.float32).reshape(3, 1, 1)
 
         # Run a model
         net.setInput(blob)
@@ -98,7 +98,7 @@ def main(func_args=None):
 
         # Get a class with a highest score.
         out = out.flatten()
-        classId = np.argmax(out)
+        classId = mx.argmax(out)
         confidence = out[classId]
 
         # Put efficiency information.

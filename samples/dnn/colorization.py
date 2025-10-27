@@ -1,7 +1,7 @@
 # Script is based on https://github.com/richzhang/colorization/blob/master/colorization/colorize.py
 # To download the caffemodel and the prototxt, see: https://github.com/richzhang/colorization/tree/caffe/colorization/models
 # To download pts_in_hull.npy, see: https://github.com/richzhang/colorization/tree/caffe/colorization/resources/pts_in_hull.npy
-import numpy as np
+import mlx.core as mx
 import argparse
 import cv2 as cv
 
@@ -25,12 +25,12 @@ if __name__ == '__main__':
     # Select desired model
     net = cv.dnn.readNetFromCaffe(args.prototxt, args.caffemodel)
 
-    pts_in_hull = np.load(args.kernel) # load cluster centers
+    pts_in_hull = mx.load(args.kernel) # load cluster centers
 
     # populate cluster centers as 1x1 convolution kernel
     pts_in_hull = pts_in_hull.transpose().reshape(2, 313, 1, 1)
-    net.getLayer(net.getLayerId('class8_ab')).blobs = [pts_in_hull.astype(np.float32)]
-    net.getLayer(net.getLayerId('conv8_313_rh')).blobs = [np.full([1, 313], 2.606, np.float32)]
+    net.getLayer(net.getLayerId('class8_ab')).blobs = [pts_in_hull.astype(mx.float32)]
+    net.getLayer(net.getLayerId('conv8_313_rh')).blobs = [mx.full([1, 313], 2.606, mx.float32)]
 
     if args.input:
         cap = cv.VideoCapture(args.input)
@@ -43,7 +43,7 @@ if __name__ == '__main__':
             cv.waitKey()
             break
 
-        img_rgb = (frame[:,:,[2, 1, 0]] * 1.0 / 255).astype(np.float32)
+        img_rgb = (frame[:,:,[2, 1, 0]] * 1.0 / 255).astype(mx.float32)
 
         img_lab = cv.cvtColor(img_rgb, cv.COLOR_RGB2Lab)
         img_l = img_lab[:,:,0] # pull out L channel
@@ -60,8 +60,8 @@ if __name__ == '__main__':
 
         (H_out,W_out) = ab_dec.shape[:2]
         ab_dec_us = cv.resize(ab_dec, (W_orig, H_orig))
-        img_lab_out = np.concatenate((img_l[:,:,np.newaxis],ab_dec_us),axis=2) # concatenate with original image L
-        img_bgr_out = np.clip(cv.cvtColor(img_lab_out, cv.COLOR_Lab2BGR), 0, 1)
+        img_lab_out = mx.concatenate((img_l[:,:,mx.newaxis],ab_dec_us),axis=2) # concatenate with original image L
+        img_bgr_out = mx.clip(cv.cvtColor(img_lab_out, cv.COLOR_Lab2BGR), 0, 1)
 
         frame = cv.resize(frame, imshowSize)
         cv.imshow('origin', frame)

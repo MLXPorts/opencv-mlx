@@ -15,8 +15,8 @@ Follow these steps if you want to convert the original model yourself:
 
     2. Create input
         image = cv2.imread(path/to/image)
-        image_rev = np.flip(image, axis=1)
-        input = np.stack([image, image_rev], axis=0)
+        image_rev = mx.flip(image, axis=1)
+        input = mx.stack([image, image_rev], axis=0)
 
     3. Hardcode image_h and image_w shapes to determine output shapes.
        We use default INPUT_SIZE = (384, 384) from evaluate_parsing_JPPNet-s2.py.
@@ -41,7 +41,7 @@ Follow these steps if you want to convert the original model yourself:
 
 import argparse
 import os.path
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 
@@ -56,7 +56,7 @@ def preprocess(image):
     Create 4-dimensional blob from image and flip image
     :param image: input image
     """
-    image_rev = np.flip(image, axis=1)
+    image_rev = mx.flip(image, axis=1)
     input = cv.dnn.blobFromImages([image, image_rev], mean=(104.00698793, 116.66876762, 122.67891434))
     return input
 
@@ -103,21 +103,21 @@ def postprocess(out, input_shape):
     # 17 RightLeg
     # 18 LeftShoe
     # 19 RightShoe
-    head_output, tail_output = np.split(out, indices_or_sections=[1], axis=0)
+    head_output, tail_output = mx.split(out, indices_or_sections=[1], axis=0)
     head_output = head_output.squeeze(0)
     tail_output = tail_output.squeeze(0)
 
-    head_output = np.stack([cv.resize(img, dsize=input_shape) for img in head_output[:, ...]])
-    tail_output = np.stack([cv.resize(img, dsize=input_shape) for img in tail_output[:, ...]])
+    head_output = mx.stack([cv.resize(img, dsize=input_shape) for img in head_output[:, ...]])
+    tail_output = mx.stack([cv.resize(img, dsize=input_shape) for img in tail_output[:, ...]])
 
-    tail_list = np.split(tail_output, indices_or_sections=list(range(1, 20)), axis=0)
+    tail_list = mx.split(tail_output, indices_or_sections=list(range(1, 20)), axis=0)
     tail_list = [arr.squeeze(0) for arr in tail_list]
     tail_list_rev = [tail_list[i] for i in range(14)]
     tail_list_rev.extend([tail_list[15], tail_list[14], tail_list[17], tail_list[16], tail_list[19], tail_list[18]])
-    tail_output_rev = np.stack(tail_list_rev, axis=0)
-    tail_output_rev = np.flip(tail_output_rev, axis=2)
-    raw_output_all = np.mean(np.stack([head_output, tail_output_rev], axis=0), axis=0, keepdims=True)
-    raw_output_all = np.argmax(raw_output_all, axis=1)
+    tail_output_rev = mx.stack(tail_list_rev, axis=0)
+    tail_output_rev = mx.flip(tail_output_rev, axis=2)
+    raw_output_all = mx.mean(mx.stack([head_output, tail_output_rev], axis=0), axis=0, keepdims=True)
+    raw_output_all = mx.argmax(raw_output_all, axis=1)
     raw_output_all = raw_output_all.transpose(1, 2, 0)
     return raw_output_all
 
@@ -133,8 +133,8 @@ def decode_labels(gray_image):
               (0, 128, 0), (0, 0, 255), (51, 170, 221), (0, 255, 255),(85, 255, 170),
               (170, 255, 85), (255, 255, 0), (255, 170, 0)]
 
-    segm = np.stack([colors[idx] for idx in gray_image.flatten()])
-    segm = segm.reshape(height, width, 3).astype(np.uint8)
+    segm = mx.stack([colors[idx] for idx in gray_image.flatten()])
+    segm = segm.reshape(height, width, 3).astype(mx.uint8)
     segm = cv.cvtColor(segm, cv.COLOR_BGR2RGB)
     return segm
 

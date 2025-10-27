@@ -4,7 +4,7 @@
 """
 import sys
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 
 
 def main(argv):
@@ -32,7 +32,7 @@ def main(argv):
         ## [update_kernel]
         # Update kernel size for a normalized box filter
         kernel_size = 3 + 2 * (ind % 5)
-        kernel = np.ones((kernel_size, kernel_size), dtype=np.float32)
+        kernel = mx.ones((kernel_size, kernel_size), dtype=mx.float32)
         kernel /= (kernel_size * kernel_size)
         ## [update_kernel]
         ## [apply_filter]

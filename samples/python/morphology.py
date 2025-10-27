@@ -17,7 +17,7 @@ from __future__ import print_function
 import sys
 PY3 = sys.version_info[0] == 3
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 

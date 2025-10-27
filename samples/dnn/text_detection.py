@@ -21,7 +21,7 @@
 
 
 # Import required modules
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import math
 import argparse
@@ -52,9 +52,9 @@ args = parser.parse_args()
 ############ Utility functions ############
 
 def fourPointsTransform(frame, vertices):
-    vertices = np.asarray(vertices)
+    vertices = mx.asarray(vertices)
     outputSize = (100, 32)
-    targetVertices = np.array([
+    targetVertices = mx.array([
         [0, outputSize[1] - 1],
         [0, 0],
         [outputSize[0] - 1, 0],
@@ -69,7 +69,7 @@ def decodeText(scores):
     text = ""
     alphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
     for i in range(scores.shape[0]):
-        c = np.argmax(scores[i][0])
+        c = mx.argmax(scores[i][0])
         if c != 0:
             text += alphabet[c - 1]
         else:

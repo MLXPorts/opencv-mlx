@@ -1,6 +1,6 @@
 from __future__ import print_function
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 import random as rng
 
@@ -22,7 +22,7 @@ def thresh_callback(val):
         hull_list.append(hull)
 
     # Draw contours + hull results
-    drawing = np.zeros((canny_output.shape[0], canny_output.shape[1], 3), dtype=np.uint8)
+    drawing = mx.zeros((canny_output.shape[0], canny_output.shape[1], 3), dtype=mx.uint8)
     for i in range(len(contours)):
         color = (rng.randint(0,256), rng.randint(0,256), rng.randint(0,256))
         cv.drawContours(drawing, contours, i, color)

@@ -14,7 +14,7 @@ from .nodes.type_node import (
 #     with different length constraints (4 and 2 accordingly).
 #   - direct substitution - just a plain type replacement without any credits to
 #     native type. Example:
-#       * `std::vector<uchar>` is `np.ndarray` with `dtype == np.uint8` in Python
+#       * `std::vector<uchar>` is `mx.ndarray` with `dtype == mx.uint8` in Python
 #       * `double` is a Python `float`
 #       * `std::string` is a Python `str`
 _PREDEFINED_TYPES = (

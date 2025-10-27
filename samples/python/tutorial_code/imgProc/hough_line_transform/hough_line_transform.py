@@ -1,15 +1,15 @@
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 
 img = cv.imread(cv.samples.findFile('sudoku.png'))
 gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
 edges = cv.Canny(gray,50,150,apertureSize = 3)
 
-lines = cv.HoughLines(edges,1,np.pi/180,200)
+lines = cv.HoughLines(edges,1,mx.pi/180,200)
 for line in lines:
     rho,theta = line[0]
-    a = np.cos(theta)
-    b = np.sin(theta)
+    a = mx.cos(theta)
+    b = mx.sin(theta)
     x0 = a*rho
     y0 = b*rho
     x1 = int(x0 + 1000*(-b))

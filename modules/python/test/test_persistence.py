@@ -3,7 +3,7 @@
 import tempfile
 import os
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 from tests_common import NewOpenCVTests
 
 
@@ -13,7 +13,7 @@ class persistence_test(NewOpenCVTests):
         os.close(fd)
 
         # Writing ...
-        expected = np.array([[[0, 1, 2, 3, 4]]])
+        expected = mx.array([[[0, 1, 2, 3, 4]]])
         expected_str = ("Hello", "World", "!")
         fs = cv.FileStorage(fname, cv.FILE_STORAGE_WRITE)
         fs.write("test", expected)
@@ -32,7 +32,7 @@ class persistence_test(NewOpenCVTests):
         self.assertEqual(test.isMap(), True)
         actual = test.mat()
         self.assertEqual(actual.shape, expected.shape)
-        self.assertEqual(np.array_equal(expected, actual), True)
+        self.assertEqual(mx.array_equal(expected, actual), True)
 
         strings = fs.getNode("strings")
         self.assertEqual(strings.isSeq(), True)

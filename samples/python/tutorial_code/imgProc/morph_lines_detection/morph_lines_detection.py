@@ -2,7 +2,7 @@
 @file morph_lines_detection.py
 @brief Use morphology transformations for extracting horizontal and vertical lines sample code
 """
-import numpy as np
+import mlx.core as mx
 import sys
 import cv2 as cv
 
@@ -56,8 +56,8 @@ def main(argv):
 
     # [init]
     # Create the images that will use to extract the horizontal and vertical lines
-    horizontal = np.copy(bw)
-    vertical = np.copy(bw)
+    horizontal = mx.copy(bw)
+    vertical = mx.copy(bw)
     # [init]
 
     # [horiz]
@@ -112,18 +112,18 @@ def main(argv):
     show_wait_destroy("edges", edges)
 
     # Step 2
-    kernel = np.ones((2, 2), np.uint8)
+    kernel = mx.ones((2, 2), mx.uint8)
     edges = cv.dilate(edges, kernel)
     show_wait_destroy("dilate", edges)
 
     # Step 3
-    smooth = np.copy(vertical)
+    smooth = mx.copy(vertical)
 
     # Step 4
     smooth = cv.blur(smooth, (2, 2))
 
     # Step 5
-    (rows, cols) = np.where(edges != 0)
+    (rows, cols) = mx.where(edges != 0)
     vertical[rows, cols] = smooth[rows, cols]
 
     # Show final result

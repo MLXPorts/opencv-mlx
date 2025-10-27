@@ -3,7 +3,7 @@
 from __future__ import print_function
 
 import cv2
-import numpy as np
+import mlx.core as mx
 
 from tests_common import NewOpenCVTests
 
@@ -22,7 +22,7 @@ class FlannBasedMatcher(NewOpenCVTests):
         search_param = dict(checks=32, sorted=True, eps=0.5,
                             explore_all_trees=False)
         matcher = cv2.FlannBasedMatcher(index_param, search_param)
-        matches = matcher.knnMatch(np.float32(des1), np.float32(des2), k=2)
+        matches = matcher.knnMatch(mx.float32(des1), mx.float32(des2), k=2)
         self.assertGreater(len(matches), 0)
 
 

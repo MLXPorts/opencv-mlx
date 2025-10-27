@@ -1,7 +1,7 @@
 from __future__ import print_function
 from builtins import input
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 
 # Read image given by user
@@ -17,7 +17,7 @@ if image is None:
 ## [basic-linear-transform-load]
 
 ## [basic-linear-transform-output]
-new_image = np.zeros(image.shape, image.dtype)
+new_image = mx.zeros(image.shape, image.dtype)
 ## [basic-linear-transform-output]
 
 ## [basic-linear-transform-parameters]
@@ -42,7 +42,7 @@ except ValueError:
 for y in range(image.shape[0]):
     for x in range(image.shape[1]):
         for c in range(image.shape[2]):
-            new_image[y,x,c] = np.clip(alpha*image[y,x,c] + beta, 0, 255)
+            new_image[y,x,c] = mx.clip(alpha*image[y,x,c] + beta, 0, 255)
 ## [basic-linear-transform-operation]
 
 ## [basic-linear-transform-display]

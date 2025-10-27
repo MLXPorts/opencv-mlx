@@ -13,7 +13,7 @@ Keyboard shortcuts:
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 from gaussian_mix import make_gaussians
@@ -23,9 +23,9 @@ def main():
     img_size = 512
 
     # generating bright palette
-    colors = np.zeros((1, cluster_n, 3), np.uint8)
+    colors = mx.zeros((1, cluster_n, 3), mx.uint8)
     colors[0,:] = 255
-    colors[0,:,0] = np.arange(0, 180, 180.0/cluster_n)
+    colors[0,:,0] = mx.arange(0, 180, 180.0/cluster_n)
     colors = cv.cvtColor(colors, cv.COLOR_HSV2BGR)[0]
 
     while True:
@@ -35,8 +35,8 @@ def main():
         term_crit = (cv.TERM_CRITERIA_EPS, 30, 0.1)
         _ret, labels, _centers = cv.kmeans(points, cluster_n, None, term_crit, 10, 0)
 
-        img = np.zeros((img_size, img_size, 3), np.uint8)
-        for (x, y), label in zip(np.int32(points), labels.ravel()):
+        img = mx.zeros((img_size, img_size, 3), mx.uint8)
+        for (x, y), label in zip(mx.int32(points), labels.ravel()):
             c = list(map(int, colors[label]))
 
             cv.circle(img, (x, y), 1, c, -1)

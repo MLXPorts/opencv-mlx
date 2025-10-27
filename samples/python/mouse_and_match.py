@@ -14,7 +14,7 @@ Demonstrate using a mouse to interact with an image:
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 # built-in modules
@@ -37,7 +37,7 @@ class App():
             if self.sel[2] > self.sel[0] and self.sel[3] > self.sel[1]:
                 patch = self.gray[self.sel[1]:self.sel[3], self.sel[0]:self.sel[2]]
                 result = cv.matchTemplate(self.gray, patch, cv.TM_CCOEFF_NORMED)
-                result = np.abs(result)**3
+                result = mx.abs(result)**3
                 _val, result = cv.threshold(result, 0.01, 0, cv.THRESH_TOZERO)
                 result8 = cv.normalize(result, None, 0, 255, cv.NORM_MINMAX, cv.CV_8U)
                 cv.imshow("result", result8)

@@ -15,7 +15,7 @@ PY3 = sys.version_info[0] == 3
 if PY3:
     xrange = range
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 from common import draw_str
 import getopt, sys
@@ -40,15 +40,15 @@ def main():
         out = cv.VideoWriter(args['-o'], cv.VideoWriter_fourcc(*'DIB '), 30.0, (w, h), False)
         print('writing %s ...' % fn)
 
-    a = np.zeros((h, w), np.float32)
-    cv.randu(a, np.array([0]), np.array([1]))
+    a = mx.zeros((h, w), mx.float32)
+    cv.randu(a, mx.array([0]), mx.array([1]))
 
     def process_scale(a_lods, lod):
         d = a_lods[lod] - cv.pyrUp(a_lods[lod+1])
         for _i in xrange(lod):
             d = cv.pyrUp(d)
         v = cv.GaussianBlur(d*d, (3, 3), 0)
-        return np.sign(d), v
+        return mx.sign(d), v
 
     scale_num = 6
     for frame_i in count():
@@ -60,9 +60,9 @@ def main():
             m, v = process_scale(a_lods, i)
             ms.append(m)
             vs.append(v)
-        mi = np.argmin(vs, 0)
-        a += np.choose(mi, ms) * 0.025
-        a = (a-a.min()) / np.ptp(a)
+        mi = mx.argmin(vs, 0)
+        a += mx.choose(mi, ms) * 0.025
+        a = (a-a.min()) / mx.ptp(a)
 
         if out:
             out.write(a)

@@ -255,7 +255,7 @@ def create_type_node(typename: str,
            as alias e.g.
             - C++ `double` -> Python `float`
             - C++ `cv::Rect` -> Python `Sequence[int]`
-            - C++ `std::vector<char>` -> Python `np.ndarray`
+            - C++ `std::vector<char>` -> Python `mx.ndarray`
            return TypeNode corresponding to the appropriate type.
         3. Check whenever typename is a container of types e.g. variant,
            sequence or tuple. If so, select appropriate Python container type

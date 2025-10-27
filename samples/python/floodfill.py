@@ -17,7 +17,7 @@ Keys:
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 import sys
@@ -56,7 +56,7 @@ class App():
             sys.exit(1)
 
         h, w = self.img.shape[:2]
-        self.mask = np.zeros((h+2, w+2), np.uint8)
+        self.mask = mx.zeros((h+2, w+2), mx.uint8)
         self.seed_pt = None
         self.fixed_range = True
         self.connectivity = 4

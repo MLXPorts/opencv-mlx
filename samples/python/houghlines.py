@@ -12,7 +12,7 @@ Usage:
 from __future__ import print_function
 
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 
 import sys
 import math
@@ -28,13 +28,13 @@ def main():
     cdst = cv.cvtColor(dst, cv.COLOR_GRAY2BGR)
 
     if True: # HoughLinesP
-        lines = cv.HoughLinesP(dst, 1, math.pi/180.0, 40, np.array([]), 50, 10)
+        lines = cv.HoughLinesP(dst, 1, math.pi/180.0, 40, mx.array([]), 50, 10)
         a, b, _c = lines.shape
         for i in range(a):
             cv.line(cdst, (lines[i][0][0], lines[i][0][1]), (lines[i][0][2], lines[i][0][3]), (0, 0, 255), 3, cv.LINE_AA)
 
     else:    # HoughLines
-        lines = cv.HoughLines(dst, 1, math.pi/180.0, 50, np.array([]), 0, 0)
+        lines = cv.HoughLines(dst, 1, math.pi/180.0, 50, mx.array([]), 0, 0)
         if lines is not None:
             a, b, _c = lines.shape
             for i in range(a):

@@ -1,4 +1,4 @@
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import argparse
 
@@ -20,7 +20,7 @@ track_window = (x, y, w, h)
 # set up the ROI for tracking
 roi = frame[y:y+h, x:x+w]
 hsv_roi =  cv.cvtColor(roi, cv.COLOR_BGR2HSV)
-mask = cv.inRange(hsv_roi, np.array((0., 60.,32.)), np.array((180.,255.,255.)))
+mask = cv.inRange(hsv_roi, mx.array((0., 60.,32.)), mx.array((180.,255.,255.)))
 roi_hist = cv.calcHist([hsv_roi],[0],mask,[180],[0,180])
 cv.normalize(roi_hist,roi_hist,0,255,cv.NORM_MINMAX)
 
@@ -39,7 +39,7 @@ while(1):
 
         # Draw it on image
         pts = cv.boxPoints(ret)
-        pts = np.int0(pts)
+        pts = mx.int0(pts)
         img2 = cv.polylines(frame,[pts],True, 255,2)
         cv.imshow('img2',img2)
 

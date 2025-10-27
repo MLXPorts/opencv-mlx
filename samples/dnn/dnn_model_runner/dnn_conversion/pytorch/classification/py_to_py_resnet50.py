@@ -1,7 +1,7 @@
 import os
 
 import cv2
-import numpy as np
+import mlx.core as mx
 import torch
 import torch.onnx
 from torch.autograd import Variable
@@ -42,12 +42,12 @@ def get_pytorch_onnx_model(original_model):
 def get_preprocessed_img(img_path):
     # read the image
     input_img = cv2.imread(img_path, cv2.IMREAD_COLOR)
-    input_img = input_img.astype(np.float32)
+    input_img = input_img.astype(mx.float32)
 
     input_img = cv2.resize(input_img, (256, 256))
 
     # define preprocess parameters
-    mean = np.array([0.485, 0.456, 0.406]) * 255.0
+    mean = mx.array([0.485, 0.456, 0.406]) * 255.0
     scale = 1 / 255.0
     std = [0.229, 0.224, 0.225]
 
@@ -63,7 +63,7 @@ def get_preprocessed_img(img_path):
         crop=True  # center crop
     )
     # 3. divide by std
-    input_blob[0] /= np.asarray(std, dtype=np.float32).reshape(3, 1, 1)
+    input_blob[0] /= mx.asarray(std, dtype=mx.float32).reshape(3, 1, 1)
     return input_blob
 
 
@@ -83,7 +83,7 @@ def get_opencv_dnn_prediction(opencv_net, preproc_img, imagenet_labels):
     print("* shape: ", out.shape)
 
     # get the predicted class ID
-    imagenet_class_id = np.argmax(out)
+    imagenet_class_id = mx.argmax(out)
 
     # get confidence
     confidence = out[0][imagenet_class_id]

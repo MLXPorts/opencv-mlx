@@ -21,7 +21,7 @@ PY3 = sys.version_info[0] == 3
 if PY3:
     xrange = range
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 from multiprocessing.pool import ThreadPool
@@ -30,13 +30,13 @@ from digits import *
 
 def cross_validate(model_class, params, samples, labels, kfold = 3, pool = None):
     n = len(samples)
-    folds = np.array_split(np.arange(n), kfold)
+    folds = mx.array_split(mx.arange(n), kfold)
     def f(i):
         model = model_class(**params)
         test_idx = folds[i]
         train_idx = list(folds)
         train_idx.pop(i)
-        train_idx = np.hstack(train_idx)
+        train_idx = mx.hstack(train_idx)
         train_samples, train_labels = samples[train_idx], labels[train_idx]
         test_samples, test_labels = samples[test_idx], labels[test_idx]
         model.train(train_samples, train_labels)
@@ -48,7 +48,7 @@ def cross_validate(model_class, params, samples, labels, kfold = 3, pool = None)
         scores = list(map(f, xrange(kfold)))
     else:
         scores = pool.map(f, xrange(kfold))
-    return np.mean(scores)
+    return mx.mean(scores)
 
 
 class App(object):
@@ -57,7 +57,7 @@ class App(object):
 
     def preprocess(self):
         digits, labels = load_digits(DIGITS_FN)
-        shuffle = np.random.permutation(len(digits))
+        shuffle = mx.random.permutation(len(digits))
         digits, labels = digits[shuffle], labels[shuffle]
         digits2 = list(map(deskew, digits))
         samples = preprocess_hog(digits2)
@@ -72,10 +72,10 @@ class App(object):
         return ires
 
     def adjust_SVM(self):
-        Cs = np.logspace(0, 10, 15, base=2)
-        gammas = np.logspace(-7, 4, 15, base=2)
-        scores = np.zeros((len(Cs), len(gammas)))
-        scores[:] = np.nan
+        Cs = mx.logspace(0, 10, 15, base=2)
+        gammas = mx.logspace(-7, 4, 15, base=2)
+        scores = mx.zeros((len(Cs), len(gammas)))
+        scores[:] = mx.nan
 
         print('adjusting SVM (may take a long time) ...')
         def f(job):
@@ -85,17 +85,17 @@ class App(object):
             score = cross_validate(SVM, params, samples, labels)
             return i, j, score
 
-        ires = self.run_jobs(f, np.ndindex(*scores.shape))
+        ires = self.run_jobs(f, mx.ndindex(*scores.shape))
         for count, (i, j, score) in enumerate(ires):
             scores[i, j] = score
             print('%d / %d (best error: %.2f %%, last: %.2f %%)' %
-                  (count+1, scores.size, np.nanmin(scores)*100, score*100))
+                  (count+1, scores.size, mx.nanmin(scores)*100, score*100))
         print(scores)
 
         print('writing score table to "svm_scores.npz"')
-        np.savez('svm_scores.npz', scores=scores, Cs=Cs, gammas=gammas)
+        mx.savez('svm_scores.npz', scores=scores, Cs=Cs, gammas=gammas)
 
-        i, j = np.unravel_index(scores.argmin(), scores.shape)
+        i, j = mx.unravel_index(scores.argmin(), scores.shape)
         best_params = dict(C = Cs[i], gamma=gammas[j])
         print('best params:', best_params)
         print('best error: %.2f %%' % (scores.min()*100))
@@ -107,7 +107,7 @@ class App(object):
             samples, labels = self.get_dataset()
             err = cross_validate(KNearest, dict(k=k), samples, labels)
             return k, err
-        best_err, best_k = np.inf, -1
+        best_err, best_k = mx.inf, -1
         for k, err in self.run_jobs(f, xrange(1, 9)):
             if err < best_err:
                 best_err, best_k = err, k

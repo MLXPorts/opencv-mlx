@@ -18,7 +18,7 @@ from __future__ import print_function
 import sys
 PY3 = sys.version_info[0] == 3
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 from tests_common import NewOpenCVTests
@@ -29,10 +29,10 @@ def toint(p):
     return tuple(map(int, p))
 
 def sample_line(p1, p2, n, noise=0.0):
-    np.random.seed(10)
-    p1 = np.float32(p1)
-    t = np.random.rand(n,1)
-    return p1 + (p2-p1)*t + np.random.normal(size=(n, 2))*noise
+    mx.random.seed(10)
+    p1 = mx.float32(p1)
+    t = mx.random.rand(n,1)
+    return p1 + (p2-p1)*t + mx.random.normal(size=(n, 2))*noise
 
 dist_func_names = ['DIST_L2', 'DIST_L1', 'DIST_L12', 'DIST_FAIR', 'DIST_WELSCH', 'DIST_HUBER']
 
@@ -47,20 +47,20 @@ class fitline_test(NewOpenCVTests):
 
         p0, p1 = (90, 80), (w-90, h-80)
         line_points = sample_line(p0, p1, n-outn, noise)
-        outliers = np.random.rand(outn, 2) * (w, h)
-        points = np.vstack([line_points, outliers])
+        outliers = mx.random.rand(outn, 2) * (w, h)
+        points = mx.vstack([line_points, outliers])
 
         lines = []
 
         for name in dist_func_names:
             func = getattr(cv, name)
-            vx, vy, cx, cy = cv.fitLine(np.float32(points), func, 0, 0.01, 0.01)
+            vx, vy, cx, cy = cv.fitLine(mx.float32(points), func, 0, 0.01, 0.01)
             line = [float(vx), float(vy), float(cx), float(cy)]
             lines.append(line)
 
         eps = 0.05
 
-        refVec =  (np.float32(p1) - p0) / cv.norm(np.float32(p1) - p0)
+        refVec =  (mx.float32(p1) - p0) / cv.norm(mx.float32(p1) - p0)
 
         for i in range(len(lines)):
             self.assertLessEqual(cv.norm(refVec - lines[i][0:2], cv.NORM_L2), eps)

@@ -6,13 +6,13 @@ import json
 import tempfile
 import os
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 from tests_common import NewOpenCVTests
 
 class MyData:
     def __init__(self):
         self.A = 97
-        self.X = np.pi
+        self.X = mx.pi
         self.name = 'mydata1234'
 
     def write(self, fs, name):
@@ -33,8 +33,8 @@ class MyData:
 
 class filestorage_io_test(NewOpenCVTests):
     strings_data = ['image1.jpg', 'Awesomeness', '../data/baboon.jpg']
-    R0 = np.eye(3,3)
-    T0 = np.zeros((3,1))
+    R0 = mx.eye(3,3)
+    T0 = mx.zeros((3,1))
 
     def write_data(self, fname):
         fs = cv.FileStorage(fname, cv.FileStorage_WRITE)
@@ -114,7 +114,7 @@ class filestorage_io_test(NewOpenCVTests):
     def test_base64(self):
         fd, fname = tempfile.mkstemp(prefix="opencv_python_sample_filestorage_base64", suffix=".json")
         os.close(fd)
-        np.random.seed(42)
+        mx.random.seed(42)
         self.write_base64_json(fname)
         os.remove(fname)
 
@@ -124,7 +124,7 @@ class filestorage_io_test(NewOpenCVTests):
         cols = 20
         cn = 3
 
-        image = np.zeros((rows, cols, cn), np.uint8)
+        image = mx.zeros((rows, cols, cn), mx.uint8)
         image[:] = (1, 2, 127)
 
         for i in range(rows):
@@ -138,7 +138,7 @@ class filestorage_io_test(NewOpenCVTests):
         shape = (2, 2, 1, 2)
         cn = 4
 
-        image = np.zeros(shape + (cn,), np.float64)
+        image = mx.zeros(shape + (cn,), mx.float64)
         image[:] = (0.888, 0.111, 0.666, 0.444)
 
         return image
@@ -148,7 +148,7 @@ class filestorage_io_test(NewOpenCVTests):
         shape = (0, 0)
         cn = 1
 
-        image = np.zeros(shape + (cn,), np.uint8)
+        image = mx.zeros(shape + (cn,), mx.uint8)
 
         return image
 
@@ -158,7 +158,7 @@ class filestorage_io_test(NewOpenCVTests):
         cols = 16
         cn = 1
 
-        image = np.random.rand(rows, cols, cn)
+        image = mx.random.rand(rows, cols, cn)
 
         return image
 

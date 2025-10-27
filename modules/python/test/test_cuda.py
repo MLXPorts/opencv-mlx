@@ -7,7 +7,7 @@ CUDA-accelerated Computer Vision functions
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import os
 
@@ -20,23 +20,23 @@ class cuda_test(NewOpenCVTests):
             self.skipTest("No CUDA-capable device is detected")
 
     def test_cuda_upload_download(self):
-        npMat = (np.random.random((128, 128, 3)) * 255).astype(np.uint8)
+        npMat = (mx.random.random((128, 128, 3)) * 255).astype(mx.uint8)
         cuMat = cv.cuda_GpuMat()
         cuMat.upload(npMat)
 
-        self.assertTrue(np.allclose(cuMat.download(), npMat))
+        self.assertTrue(mx.allclose(cuMat.download(), npMat))
 
     def test_cuda_upload_download_stream(self):
         stream = cv.cuda_Stream()
-        npMat = (np.random.random((128, 128, 3)) * 255).astype(np.uint8)
+        npMat = (mx.random.random((128, 128, 3)) * 255).astype(mx.uint8)
         cuMat = cv.cuda_GpuMat(128,128, cv.CV_8UC3)
         cuMat.upload(npMat, stream)
         npMat2 = cuMat.download(stream=stream)
         stream.waitForCompletion()
-        self.assertTrue(np.allclose(npMat2, npMat))
+        self.assertTrue(mx.allclose(npMat2, npMat))
 
     def test_cuda_interop(self):
-        npMat = (np.random.random((128, 128, 3)) * 255).astype(np.uint8)
+        npMat = (mx.random.random((128, 128, 3)) * 255).astype(mx.uint8)
         cuMat = cv.cuda_GpuMat()
         cuMat.upload(npMat)
         self.assertTrue(cuMat.cudaPtr() != 0)
@@ -62,7 +62,7 @@ class cuda_test(NewOpenCVTests):
         self.assertEqual(cuMat.type(), cv.CV_8UC3)
 
     def test_cuda_release(self):
-        npMat = (np.random.random((128, 128, 3)) * 255).astype(np.uint8)
+        npMat = (mx.random.random((128, 128, 3)) * 255).astype(mx.uint8)
         cuMat = cv.cuda_GpuMat()
         cuMat.upload(npMat)
         cuMat.release()
@@ -73,8 +73,8 @@ class cuda_test(NewOpenCVTests):
     @unittest.skip("failed test")
     def test_cuda_convertTo(self):
         # setup
-        npMat_8UC4 = (np.random.random((128, 128, 4)) * 255).astype(np.uint8)
-        npMat_32FC4 = npMat_8UC4.astype(np.single)
+        npMat_8UC4 = (mx.random.random((128, 128, 4)) * 255).astype(mx.uint8)
+        npMat_32FC4 = npMat_8UC4.astype(mx.single)
         new_type = cv.CV_32FC4
 
         # sync
@@ -84,11 +84,11 @@ class cuda_test(NewOpenCVTests):
         cuMat_32FC4_out = cuMat_8UC4.convertTo(new_type, cuMat_32FC4)
         self.assertTrue(cuMat_32FC4.cudaPtr() == cuMat_32FC4_out.cudaPtr())
         npMat_32FC4_out = cuMat_32FC4.download()
-        self.assertTrue(np.array_equal(npMat_32FC4, npMat_32FC4_out))
+        self.assertTrue(mx.array_equal(npMat_32FC4, npMat_32FC4_out))
         # out
         cuMat_32FC4_out = cuMat_8UC4.convertTo(new_type)
         npMat_32FC4_out = cuMat_32FC4.download()
-        self.assertTrue(np.array_equal(npMat_32FC4, npMat_32FC4_out))
+        self.assertTrue(mx.array_equal(npMat_32FC4, npMat_32FC4_out))
 
         # async
         stream = cv.cuda.Stream()
@@ -99,17 +99,17 @@ class cuda_test(NewOpenCVTests):
         self.assertTrue(cuMat_32FC4.cudaPtr() == cuMat_32FC4_out.cudaPtr())
         npMat_32FC4_out = cuMat_32FC4.download(stream)
         stream.waitForCompletion()
-        self.assertTrue(np.array_equal(npMat_32FC4, npMat_32FC4_out))
+        self.assertTrue(mx.array_equal(npMat_32FC4, npMat_32FC4_out))
         # out
         cuMat_32FC4_out = cuMat_8UC4.convertTo(new_type, 1, 0, stream)
         npMat_32FC4_out = cuMat_32FC4.download(stream)
         stream.waitForCompletion()
-        self.assertTrue(np.array_equal(npMat_32FC4, npMat_32FC4_out))
+        self.assertTrue(mx.array_equal(npMat_32FC4, npMat_32FC4_out))
 
     @unittest.skip("failed test")
     def test_cuda_copyTo(self):
         # setup
-        npMat_8UC4 = (np.random.random((128, 128, 4)) * 255).astype(np.uint8)
+        npMat_8UC4 = (mx.random.random((128, 128, 4)) * 255).astype(mx.uint8)
 
         # sync
         # in/out
@@ -118,11 +118,11 @@ class cuda_test(NewOpenCVTests):
         cuMat_8UC4_out = cuMat_8UC4.copyTo(cuMat_8UC4_dst)
         self.assertTrue(cuMat_8UC4_out.cudaPtr() == cuMat_8UC4_dst.cudaPtr())
         npMat_8UC4_out = cuMat_8UC4_out.download()
-        self.assertTrue(np.array_equal(npMat_8UC4, npMat_8UC4_out))
+        self.assertTrue(mx.array_equal(npMat_8UC4, npMat_8UC4_out))
         # out
         cuMat_8UC4_out =  cuMat_8UC4.copyTo()
         npMat_8UC4_out = cuMat_8UC4_out.download()
-        self.assertTrue(np.array_equal(npMat_8UC4, npMat_8UC4_out))
+        self.assertTrue(mx.array_equal(npMat_8UC4, npMat_8UC4_out))
 
         # async
         stream = cv.cuda.Stream()
@@ -133,12 +133,12 @@ class cuda_test(NewOpenCVTests):
         self.assertTrue(cuMat_8UC4_out.cudaPtr() == cuMat_8UC4_out.cudaPtr())
         npMat_8UC4_out = cuMat_8UC4_dst.download(stream)
         stream.waitForCompletion()
-        self.assertTrue(np.array_equal(npMat_8UC4, npMat_8UC4_out))
+        self.assertTrue(mx.array_equal(npMat_8UC4, npMat_8UC4_out))
         # out
         cuMat_8UC4_out = cuMat_8UC4.copyTo(stream)
         npMat_8UC4_out = cuMat_8UC4_out.download(stream)
         stream.waitForCompletion()
-        self.assertTrue(np.array_equal(npMat_8UC4, npMat_8UC4_out))
+        self.assertTrue(mx.array_equal(npMat_8UC4, npMat_8UC4_out))
 
     def test_cuda_denoising(self):
         self.assertEqual(True, hasattr(cv.cuda, 'fastNlMeansDenoising'))
@@ -146,14 +146,14 @@ class cuda_test(NewOpenCVTests):
         self.assertEqual(True, hasattr(cv.cuda, 'nonLocalMeans'))
 
     def test_dlpack_GpuMat(self):
-        for dtype in [np.int8, np.uint8, np.int16, np.uint16, np.float16, np.int32, np.float32, np.float64]:
+        for dtype in [mx.int8, mx.uint8, mx.int16, mx.uint16, mx.float16, mx.int32, mx.float32, mx.float64]:
             for channels in [2, 3, 5]:
-                ref = (np.random.random((64, 128, channels)) * 255).astype(dtype)
+                ref = (mx.random.random((64, 128, channels)) * 255).astype(dtype)
                 src = cv.cuda_GpuMat()
                 src.upload(ref)
                 dst = cv.cuda_GpuMat.from_dlpack(src)
                 test = dst.download()
-                equal = np.array_equal(ref, test)
+                equal = mx.array_equal(ref, test)
                 if not equal:
                     print(f"Failed test with dtype {dtype} and {channels} channels")
                 self.assertTrue(equal)

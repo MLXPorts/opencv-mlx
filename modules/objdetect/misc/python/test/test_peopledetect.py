@@ -7,7 +7,7 @@ example to detect upright people in images using HOG features
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 

@@ -8,7 +8,7 @@ PY3 = sys.version_info[0] == 3
 if PY3:
     xrange = range
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 from numpy import random
@@ -19,19 +19,19 @@ def make_gaussians(cluster_n, img_size):
     for _i in xrange(cluster_n):
         mean = (0.1 + 0.8*random.rand(2)) * img_size
         a = (random.rand(2, 2)-0.5)*img_size*0.1
-        cov = np.dot(a.T, a) + img_size*0.05*np.eye(2)
+        cov = mx.dot(a.T, a) + img_size*0.05*mx.eye(2)
         n = 100 + random.randint(900)
         pts = random.multivariate_normal(mean, cov, n)
         points.append( pts )
         ref_distrs.append( (mean, cov) )
-    points = np.float32( np.vstack(points) )
+    points = mx.float32( mx.vstack(points) )
     return points, ref_distrs
 
 def draw_gaussain(img, mean, cov, color):
     x, y = mean
     w, u, _vt = cv.SVDecomp(cov)
-    ang = np.arctan2(u[1, 0], u[0, 0])*(180/np.pi)
-    s1, s2 = np.sqrt(w)*3.0
+    ang = mx.arctan2(u[1, 0], u[0, 0])*(180/mx.pi)
+    s1, s2 = mx.sqrt(w)*3.0
     cv.ellipse(img, (int(x), int(y)), (int(s1), int(s2)), ang, 0, 360, color, 1, cv.LINE_AA)
 
 
@@ -55,8 +55,8 @@ def main():
         found_distrs = zip(means, covs)
         print('ready!\n')
 
-        img = np.zeros((img_size, img_size, 3), np.uint8)
-        for x, y in np.int32(points):
+        img = mx.zeros((img_size, img_size, 3), mx.uint8)
+        for x, y in mx.int32(points):
             cv.circle(img, (x, y), 1, (255, 255, 255), -1)
         for m, cov in ref_distrs:
             draw_gaussain(img, m, cov, (0, 255, 0))

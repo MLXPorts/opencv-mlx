@@ -29,28 +29,28 @@ PY3 = sys.version_info[0] == 3
 if PY3:
     xrange = range
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 from common import draw_str, RectSelector
 import video
 
 def rnd_warp(a):
     h, w = a.shape[:2]
-    T = np.zeros((2, 3))
+    T = mx.zeros((2, 3))
     coef = 0.2
-    ang = (np.random.rand()-0.5)*coef
-    c, s = np.cos(ang), np.sin(ang)
+    ang = (mx.random.rand()-0.5)*coef
+    c, s = mx.cos(ang), mx.sin(ang)
     T[:2, :2] = [[c,-s], [s, c]]
-    T[:2, :2] += (np.random.rand(2, 2) - 0.5)*coef
+    T[:2, :2] += (mx.random.rand(2, 2) - 0.5)*coef
     c = (w/2, h/2)
-    T[:,2] = c - np.dot(T[:2, :2], c)
+    T[:,2] = c - mx.dot(T[:2, :2], c)
     return cv.warpAffine(a, T, (w, h), borderMode = cv.BORDER_REFLECT)
 
 def divSpec(A, B):
     Ar, Ai = A[...,0], A[...,1]
     Br, Bi = B[...,0], B[...,1]
     C = (Ar+1j*Ai)/(Br+1j*Bi)
-    C = np.dstack([np.real(C), np.imag(C)]).copy()
+    C = mx.dstack([mx.real(C), mx.imag(C)]).copy()
     return C
 
 eps = 1e-5
@@ -65,14 +65,14 @@ class MOSSE:
         img = cv.getRectSubPix(frame, (w, h), (x, y))
 
         self.win = cv.createHanningWindow((w, h), cv.CV_32F)
-        g = np.zeros((h, w), np.float32)
+        g = mx.zeros((h, w), mx.float32)
         g[h//2, w//2] = 1
         g = cv.GaussianBlur(g, (-1, -1), 2.0)
         g /= g.max()
 
         self.G = cv.dft(g, flags=cv.DFT_COMPLEX_OUTPUT)
-        self.H1 = np.zeros_like(self.G)
-        self.H2 = np.zeros_like(self.G)
+        self.H1 = mx.zeros_like(self.G)
+        self.H2 = mx.zeros_like(self.G)
         for _i in xrange(128):
             a = self.preprocess(rnd_warp(img))
             A = cv.dft(a, flags=cv.DFT_COMPLEX_OUTPUT)
@@ -105,12 +105,12 @@ class MOSSE:
     def state_vis(self):
         f = cv.idft(self.H, flags=cv.DFT_SCALE | cv.DFT_REAL_OUTPUT )
         h, w = f.shape
-        f = np.roll(f, -h//2, 0)
-        f = np.roll(f, -w//2, 1)
-        kernel = np.uint8( (f-f.min()) / np.ptp(f)*255 )
+        f = mx.roll(f, -h//2, 0)
+        f = mx.roll(f, -w//2, 1)
+        kernel = mx.uint8( (f-f.min()) / mx.ptp(f)*255 )
         resp = self.last_resp
-        resp = np.uint8(np.clip(resp/resp.max(), 0, 1)*255)
-        vis = np.hstack([self.last_img, kernel, resp])
+        resp = mx.uint8(mx.clip(resp/resp.max(), 0, 1)*255)
+        vis = mx.hstack([self.last_img, kernel, resp])
         return vis
 
     def draw_state(self, vis):
@@ -125,7 +125,7 @@ class MOSSE:
         draw_str(vis, (x1, y2+16), 'PSR: %.2f' % self.psr)
 
     def preprocess(self, img):
-        img = np.log(np.float32(img)+1.0)
+        img = mx.log(mx.float32(img)+1.0)
         img = (img-img.mean()) / (img.std()+eps)
         return img*self.win
 

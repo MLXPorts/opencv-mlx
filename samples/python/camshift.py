@@ -30,7 +30,7 @@ PY3 = sys.version_info[0] == 3
 if PY3:
     xrange = range
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 # local module
@@ -67,7 +67,7 @@ class App(object):
     def show_hist(self):
         bin_count = self.hist.shape[0]
         bin_w = 24
-        img = np.zeros((256, bin_count*bin_w, 3), np.uint8)
+        img = mx.zeros((256, bin_count*bin_w, 3), mx.uint8)
         for i in xrange(bin_count):
             h = int(self.hist[i])
             cv.rectangle(img, (i*bin_w+2, 255), ((i+1)*bin_w-2, 255-h), (int(180.0*i/bin_count), 255, 255), -1)
@@ -79,7 +79,7 @@ class App(object):
             _ret, self.frame = self.cam.read()
             vis = self.frame.copy()
             hsv = cv.cvtColor(self.frame, cv.COLOR_BGR2HSV)
-            mask = cv.inRange(hsv, np.array((0., 60., 32.)), np.array((180., 255., 255.)))
+            mask = cv.inRange(hsv, mx.array((0., 60., 32.)), mx.array((180., 255., 255.)))
 
             if self.selection:
                 x0, y0, x1, y1 = self.selection
@@ -102,7 +102,7 @@ class App(object):
                 track_box, self.track_window = cv.CamShift(prob, self.track_window, term_crit)
 
                 if self.show_backproj:
-                    vis[:] = prob[...,np.newaxis]
+                    vis[:] = prob[...,mx.newaxis]
                 try:
                     cv.ellipse(vis, track_box, (0, 0, 255), 2)
                 except:

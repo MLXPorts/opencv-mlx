@@ -9,7 +9,7 @@ import hashlib
 import random
 import argparse
 
-import numpy as np
+import mlx.core as mx
 #sys.OpenCV_LOADER_DEBUG = True
 import cv2 as cv
 
@@ -49,7 +49,7 @@ class NewOpenCVTests(unittest.TestCase):
             filepath = self.find_file(filename)
             with open(filepath, 'rb') as f:
                 filedata = f.read()
-            self.image_cache[filename] = cv.imdecode(np.frombuffer(filedata, dtype=np.uint8), iscolor)
+            self.image_cache[filename] = cv.imdecode(mx.frombuffer(filedata, dtype=mx.uint8), iscolor)
         return self.image_cache[filename]
 
     def setUp(self):
@@ -103,10 +103,10 @@ class NewOpenCVTests(unittest.TestCase):
 def intersectionRate(s1, s2):
 
     x1, y1, x2, y2 = s1
-    s1 = np.array([[x1, y1], [x2,y1], [x2, y2], [x1, y2]])
+    s1 = mx.array([[x1, y1], [x2,y1], [x2, y2], [x1, y2]])
 
     x1, y1, x2, y2 = s2
-    s2 = np.array([[x1, y1], [x2,y1], [x2, y2], [x1, y2]])
+    s2 = mx.array([[x1, y1], [x2,y1], [x2, y2], [x1, y2]])
 
     area, _intersection = cv.intersectConvexConvex(s1, s2)
     return 2 * area / (cv.contourArea(s1) + cv.contourArea(s2))

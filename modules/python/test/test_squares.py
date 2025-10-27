@@ -13,13 +13,13 @@ PY3 = sys.version_info[0] == 3
 if PY3:
     xrange = range
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 
 def angle_cos(p0, p1, p2):
     d1, d2 = (p0-p1).astype('float'), (p2-p1).astype('float')
-    return abs( np.dot(d1, d2) / np.sqrt( np.dot(d1, d1)*np.dot(d2, d2) ) )
+    return abs( mx.dot(d1, d2) / mx.sqrt( mx.dot(d1, d1)*mx.dot(d2, d2) ) )
 
 def find_squares(img):
     img = cv.GaussianBlur(img, (5, 5), 0)
@@ -37,15 +37,15 @@ def find_squares(img):
                 cnt = cv.approxPolyDP(cnt, 0.02*cnt_len, True)
                 if len(cnt) == 4 and cv.contourArea(cnt) > 1000 and cv.isContourConvex(cnt):
                     cnt = cnt.reshape(-1, 2)
-                    max_cos = np.max([angle_cos( cnt[i], cnt[(i+1) % 4], cnt[(i+2) % 4] ) for i in xrange(4)])
+                    max_cos = mx.max([angle_cos( cnt[i], cnt[(i+1) % 4], cnt[(i+2) % 4] ) for i in xrange(4)])
                     if max_cos < 0.1 and filterSquares(squares, cnt):
                         squares.append(cnt)
 
     return squares
 
 def intersectionRate(s1, s2):
-    area, _intersection = cv.intersectConvexConvex(np.array(s1), np.array(s2))
-    return 2 * area / (cv.contourArea(np.array(s1)) + cv.contourArea(np.array(s2)))
+    area, _intersection = cv.intersectConvexConvex(mx.array(s1), mx.array(s2))
+    return 2 * area / (cv.contourArea(mx.array(s1)) + cv.contourArea(mx.array(s2)))
 
 def filterSquares(squares, square):
 

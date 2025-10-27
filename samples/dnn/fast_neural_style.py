@@ -1,6 +1,6 @@
 from __future__ import print_function
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 
 parser = argparse.ArgumentParser(
@@ -46,7 +46,7 @@ while cv.waitKey(1) < 0:
     if args.median_filter:
         out = cv.medianBlur(out, args.median_filter)
 
-    out = np.clip(out, 0, 255)
-    out = out.astype(np.uint8)
+    out = mx.clip(out, 0, 255)
+    out = out.astype(mx.uint8)
 
     cv.imshow('Styled image', out)

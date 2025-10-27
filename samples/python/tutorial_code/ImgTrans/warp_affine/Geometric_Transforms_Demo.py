@@ -1,6 +1,6 @@
 from __future__ import print_function
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 
 ## [Load the image]
@@ -15,8 +15,8 @@ if src is None:
 ## [Load the image]
 
 ## [Set your 3 points to calculate the  Affine Transform]
-srcTri = np.array( [[0, 0], [src.shape[1] - 1, 0], [0, src.shape[0] - 1]] ).astype(np.float32)
-dstTri = np.array( [[0, src.shape[1]*0.33], [src.shape[1]*0.85, src.shape[0]*0.25], [src.shape[1]*0.15, src.shape[0]*0.7]] ).astype(np.float32)
+srcTri = mx.array( [[0, 0], [src.shape[1] - 1, 0], [0, src.shape[0] - 1]] ).astype(mx.float32)
+dstTri = mx.array( [[0, src.shape[1]*0.33], [src.shape[1]*0.85, src.shape[0]*0.25], [src.shape[1]*0.15, src.shape[0]*0.7]] ).astype(mx.float32)
 ## [Set your 3 points to calculate the  Affine Transform]
 
 ## [Get the Affine Transform]

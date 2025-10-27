@@ -4,13 +4,13 @@
 # Python 2/3 compatibility
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import sys
 
 
 def randomColor():
-    color = np.random.randint(0, 255,(1, 3))
+    color = mx.random.randint(0, 255,(1, 3))
     return color[0].tolist()
 
 def  perspectiveCorrection(img1Path, img2Path ,patternSize ):
@@ -44,9 +44,9 @@ def  perspectiveCorrection(img1Path, img2Path ,patternSize ):
     # [compute-transformed-corners]
     img_draw_matches = cv.hconcat([img1, img2])
     for i in range(len(corners1)):
-        pt1 = np.array([corners1[i][0], corners1[i][1], 1])
+        pt1 = mx.array([corners1[i][0], corners1[i][1], 1])
         pt1 = pt1.reshape(3, 1)
-        pt2 = np.dot(H, pt1)
+        pt2 = mx.dot(H, pt1)
         pt2 = pt2/pt2[2]
         end = (int(img1.shape[1] + pt2[0]), int(pt2[1]))
         cv.line(img_draw_matches, tuple([int(j) for j in corners1[i]]), end, randomColor(), 2)

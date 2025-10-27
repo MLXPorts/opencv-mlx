@@ -22,7 +22,7 @@ PY3 = sys.version_info[0] == 3
 if PY3:
     long = int
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 from math import cos, sin, sqrt, pi
@@ -35,19 +35,19 @@ def main():
     code = long(-1)
     num_circle_steps = 12
     while True:
-        img = np.zeros((img_height, img_width, 3), np.uint8)
-        state = np.array([[0.0],[(2 * pi) / num_circle_steps]])   # start state
-        kalman.transitionMatrix = np.array([[1., 1.], [0., 1.]])  # F. input
-        kalman.measurementMatrix = 1. * np.eye(1, 2)              # H. input
-        kalman.processNoiseCov = 1e-5 * np.eye(2)                 # Q. input
-        kalman.measurementNoiseCov = 1e-1 * np.ones((1, 1))       # R. input
-        kalman.errorCovPost = 1. * np.eye(2, 2)                   # P._k|k  KF state var
-        kalman.statePost = 0.1 * np.random.randn(2, 1)            # x^_k|k  KF state var
+        img = mx.zeros((img_height, img_width, 3), mx.uint8)
+        state = mx.array([[0.0],[(2 * pi) / num_circle_steps]])   # start state
+        kalman.transitionMatrix = mx.array([[1., 1.], [0., 1.]])  # F. input
+        kalman.measurementMatrix = 1. * mx.eye(1, 2)              # H. input
+        kalman.processNoiseCov = 1e-5 * mx.eye(2)                 # Q. input
+        kalman.measurementNoiseCov = 1e-1 * mx.ones((1, 1))       # R. input
+        kalman.errorCovPost = 1. * mx.eye(2, 2)                   # P._k|k  KF state var
+        kalman.statePost = 0.1 * mx.random.randn(2, 1)            # x^_k|k  KF state var
 
         while True:
             def calc_point(angle):
-                return (np.around(img_width / 2. + img_width / 3.0 * cos(angle), 0).astype(int),
-                        np.around(img_height / 2. - img_width / 3.0 * sin(angle), 1).astype(int))
+                return (mx.around(img_width / 2. + img_width / 3.0 * cos(angle), 0).astype(int),
+                        mx.around(img_height / 2. - img_width / 3.0 * sin(angle), 1).astype(int))
             img = img * 1e-3
             state_angle = state[0, 0]
             state_pt = calc_point(state_angle)
@@ -59,8 +59,8 @@ def main():
 
             predict_pt = calc_point(prediction[0, 0])  # equivalent to calc_point(kalman.statePre[0,0])
             # generate measurement
-            measurement = kalman.measurementNoiseCov * np.random.randn(1, 1)
-            measurement = np.dot(kalman.measurementMatrix, state) + measurement
+            measurement = kalman.measurementNoiseCov * mx.random.randn(1, 1)
+            measurement = mx.dot(kalman.measurementMatrix, state) + measurement
 
             measurement_angle = measurement[0, 0]
             measurement_pt = calc_point(measurement_angle)
@@ -76,7 +76,7 @@ def main():
             cv.drawMarker(img, improved_pt, (0, 255, 0), cv.MARKER_SQUARE, 5, 2)
             cv.drawMarker(img, state_pt, (255, 255, 255), cv.MARKER_STAR, 10, 1)
             # forecast one step
-            cv.drawMarker(img, calc_point(np.dot(kalman.transitionMatrix, kalman.statePost)[0, 0]),
+            cv.drawMarker(img, calc_point(mx.dot(kalman.transitionMatrix, kalman.statePost)[0, 0]),
                           (255, 255, 0), cv.MARKER_SQUARE, 12, 1)
 
             cv.line(img, state_pt, measurement_pt, (0, 0, 255), 1, cv.LINE_AA, 0)  # red measurement error
@@ -84,8 +84,8 @@ def main():
             cv.line(img, state_pt, improved_pt, (0, 255, 0), 1, cv.LINE_AA, 0)  # green post-meas error
 
             # update the real process
-            process_noise = sqrt(kalman.processNoiseCov[0, 0]) * np.random.randn(2, 1)
-            state = np.dot(kalman.transitionMatrix, state) + process_noise  # x_k+1 = F x_k + w_k
+            process_noise = sqrt(kalman.processNoiseCov[0, 0]) * mx.random.randn(2, 1)
+            state = mx.dot(kalman.transitionMatrix, state) + process_noise  # x_k+1 = F x_k + w_k
 
             cv.imshow("Kalman", img)
             code = cv.waitKey(1000)

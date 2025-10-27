@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import os
 import sys
@@ -98,7 +98,7 @@ try:
             # NB: dtype is just ignored in this implementation.
             # Moreover from G-API kernel got scalar as tuples with 4 elements
             # where the last element is equal to zero, just cut him for broadcasting.
-            return img + np.array(sc, dtype=np.uint8)[:-1]
+            return img + mx.array(sc, dtype=mx.uint8)[:-1]
 
 
     @cv.gapi.op('custom.size', in_types=[cv.GMat], out_types=[cv.GOpaque.Size])
@@ -157,7 +157,7 @@ try:
         def run(array):
             # NB: OpenCV - numpy array (n_points x 2).
             #     G-API  - array of tuples (n_points).
-            return cv.boundingRect(np.array(array))
+            return cv.boundingRect(mx.array(array))
 
 
     @cv.gapi.op('custom.goodFeaturesToTrack',
@@ -189,7 +189,7 @@ try:
             # NB: The operation output is cv::GArray<cv::Pointf>, so it should be mapped
             # to python parameters like this: [(1.2, 3.4), (5.2, 3.2)], because the cv::Point2f
             # according to opencv rules mapped to the tuple and cv::GArray<> mapped to the list.
-            # OpenCV returns np.array with shape (n_features, 1, 2), so let's to convert it to list
+            # OpenCV returns mx.array with shape (n_features, 1, 2), so let's to convert it to list
             # tuples with size == n_features.
             features = list(map(tuple, features.reshape(features.shape[0], -1)))
             return features
@@ -252,8 +252,8 @@ try:
 
         def test_custom_op_add(self):
             sz = (3, 3)
-            in_mat1 = np.full(sz, 45, dtype=np.uint8)
-            in_mat2 = np.full(sz, 50, dtype=np.uint8)
+            in_mat1 = mx.full(sz, 45, dtype=mx.uint8)
+            in_mat2 = mx.full(sz, 50, dtype=mx.uint8)
 
             # OpenCV
             expected = cv.add(in_mat1, in_mat2)
@@ -273,11 +273,11 @@ try:
 
         def test_custom_op_split3(self):
             sz = (4, 4)
-            in_ch1 = np.full(sz, 1, dtype=np.uint8)
-            in_ch2 = np.full(sz, 2, dtype=np.uint8)
-            in_ch3 = np.full(sz, 3, dtype=np.uint8)
+            in_ch1 = mx.full(sz, 1, dtype=mx.uint8)
+            in_ch2 = mx.full(sz, 2, dtype=mx.uint8)
+            in_ch3 = mx.full(sz, 3, dtype=mx.uint8)
             # H x W x C
-            in_mat = np.stack((in_ch1, in_ch2, in_ch3), axis=2)
+            in_mat = mx.stack((in_ch1, in_ch2, in_ch3), axis=2)
 
             # G-API
             g_in  = cv.GMat()
@@ -315,11 +315,11 @@ try:
 
         def test_custom_op_addC(self):
             sz = (3, 3, 3)
-            in_mat = np.full(sz, 45, dtype=np.uint8)
+            in_mat = mx.full(sz, 45, dtype=mx.uint8)
             sc = (50, 10, 20)
 
             # Numpy reference, make array from sc to keep uint8 dtype.
-            expected = in_mat + np.array(sc, dtype=np.uint8)
+            expected = in_mat + mx.array(sc, dtype=mx.uint8)
 
             # G-API
             g_in  = cv.GMat()
@@ -335,7 +335,7 @@ try:
 
         def test_custom_op_size(self):
             sz = (100, 150, 3)
-            in_mat = np.full(sz, 45, dtype=np.uint8)
+            in_mat = mx.full(sz, 45, dtype=mx.uint8)
 
             # Open_cV
             expected = (100, 150)
@@ -373,7 +373,7 @@ try:
             points = [(0,0), (0,1), (1,0), (1,1)]
 
             # OpenCV
-            expected = cv.boundingRect(np.array(points))
+            expected = cv.boundingRect(mx.array(points))
 
             # G-API
             g_pts = cv.GArray.Point()
@@ -419,7 +419,7 @@ try:
             # G-API  - list of tuples with size - num_points
             # Comparison
             self.assertEqual(0.0, cv.norm(expected.flatten(),
-                                          np.array(actual, dtype=np.float32).flatten(), cv.NORM_INF))
+                                          mx.array(actual, dtype=mx.float32).flatten(), cv.NORM_INF))
 
 
         def test_invalid_op(self):
@@ -587,8 +587,8 @@ try:
 
             comp = cv.GComputation(cv.GIn(g_in0, g_in1), cv.GOut(g_out))
 
-            img0 = np.array([1, 2, 3])
-            img1 = np.array([1, 2, 3])
+            img0 = mx.array([1, 2, 3])
+            img1 = mx.array([1, 2, 3])
 
             with self.assertRaises(Exception): comp.apply(cv.gin(img0, img1),
                                                           args=cv.gapi.compile_args(
@@ -614,8 +614,8 @@ try:
 
             comp = cv.GComputation(cv.GIn(g_in0, g_in1), cv.GOut(g_out))
 
-            img0 = np.array([1, 2, 3])
-            img1 = np.array([1, 2, 3])
+            img0 = mx.array([1, 2, 3])
+            img1 = mx.array([1, 2, 3])
 
             with self.assertRaises(Exception): comp.apply(cv.gin(img0, img1),
                                                           args=cv.gapi.compile_args(
@@ -642,8 +642,8 @@ try:
 
             comp = cv.GComputation(cv.GIn(g_in0, g_in1), cv.GOut(g_out))
 
-            img0 = np.array([1, 2, 3])
-            img1 = np.array([1, 2, 3])
+            img0 = mx.array([1, 2, 3])
+            img1 = mx.array([1, 2, 3])
 
             # FIXME: Cause Bad variant access.
             # Need to provide more descriptive error message.
@@ -674,7 +674,7 @@ try:
             class GTransposeImpl:
                 @staticmethod
                 def run(img, order):
-                    return np.transpose(img, order)
+                    return mx.transpose(img, order)
 
             img_path = self.find_file('cv/face/david2.jpg', [os.environ.get('OPENCV_TEST_DATA_PATH')])
             img      = cv.imread(img_path)
@@ -687,7 +687,7 @@ try:
             # OpenCV
             expected = cv.cvtColor(img, cv.COLOR_BGR2RGB)
             expected = cv.resize(expected, size)
-            expected = np.transpose(expected, order)
+            expected = mx.transpose(expected, order)
             expected = cv.mean(expected)
 
             # G-API

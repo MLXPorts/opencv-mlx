@@ -1,6 +1,6 @@
 from __future__ import print_function
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 import random as rng
 
@@ -12,7 +12,7 @@ max_qualityLevel = 100
 rng.seed(12345)
 
 def myHarris_function(val):
-    myHarris_copy = np.copy(src)
+    myHarris_copy = mx.copy(src)
     myHarris_qualityLevel = max(val, 1)
 
     for i in range(src_gray.shape[0]):
@@ -23,7 +23,7 @@ def myHarris_function(val):
     cv.imshow(myHarris_window, myHarris_copy)
 
 def myShiTomasi_function(val):
-    myShiTomasi_copy = np.copy(src)
+    myShiTomasi_copy = mx.copy(src)
     myShiTomasi_qualityLevel = max(val, 1)
 
     for i in range(src_gray.shape[0]):
@@ -53,7 +53,7 @@ apertureSize = 3
 myHarris_dst = cv.cornerEigenValsAndVecs(src_gray, blockSize, apertureSize)
 
 # calculate Mc
-Mc = np.empty(src_gray.shape, dtype=np.float32)
+Mc = mx.empty(src_gray.shape, dtype=mx.float32)
 for i in range(src_gray.shape[0]):
     for j in range(src_gray.shape[1]):
         lambda_1 = myHarris_dst[i,j,0]

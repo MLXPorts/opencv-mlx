@@ -18,7 +18,7 @@ Download the .onnx model from here https://github.com/opencv/opencv_zoo/raw/281d
 
 import argparse
 import os.path
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 
 
@@ -44,28 +44,28 @@ class OpticalFlow(object):
         return output
 
     def motion_to_color(self, flow):
-        arr = np.arange(0, 255, dtype=np.uint8)
+        arr = mx.arange(0, 255, dtype=mx.uint8)
         colormap = cv.applyColorMap(arr, cv.COLORMAP_HSV)
         colormap = colormap.squeeze(1)
 
         flow = flow.squeeze(0)
         fx, fy = flow[0, ...], flow[1, ...]
-        rad = np.sqrt(fx**2 + fy**2)
+        rad = mx.sqrt(fx**2 + fy**2)
         maxrad = rad.max() if rad.max() != 0 else 1
 
         ncols = arr.size
-        rad = rad[..., np.newaxis] / maxrad
-        a = np.arctan2(-fy / maxrad, -fx / maxrad) / np.pi
+        rad = rad[..., mx.newaxis] / maxrad
+        a = mx.arctan2(-fy / maxrad, -fx / maxrad) / mx.pi
         fk = (a + 1) / 2.0 * (ncols - 1)
-        k0 = fk.astype(np.int32)
+        k0 = fk.astype(mx.int32)
         k1 = (k0 + 1) % ncols
-        f = fk[..., np.newaxis] - k0[..., np.newaxis]
+        f = fk[..., mx.newaxis] - k0[..., mx.newaxis]
 
         col0 = colormap[k0] / 255.0
         col1 = colormap[k1] / 255.0
         col = (1 - f) * col0 + f * col1
-        col = np.where(rad <= 1, 1 - rad * (1 - col), col * 0.75)
-        output = (255.0 * col).astype(np.uint8)
+        col = mx.where(rad <= 1, 1 - rad * (1 - col), col * 0.75)
+        output = (255.0 * col).astype(mx.uint8)
         return output
 
 
@@ -92,8 +92,8 @@ if __name__ == '__main__':
     if args.proto:
         divisor = 64.
         var = {}
-        var['ADAPTED_WIDTH'] = int(np.ceil(args.width/divisor) * divisor)
-        var['ADAPTED_HEIGHT'] = int(np.ceil(args.height/divisor) * divisor)
+        var['ADAPTED_WIDTH'] = int(mx.ceil(args.width/divisor) * divisor)
+        var['ADAPTED_HEIGHT'] = int(mx.ceil(args.height/divisor) * divisor)
         var['SCALE_WIDTH'] = args.width / float(var['ADAPTED_WIDTH'])
         var['SCALE_HEIGHT'] = args.height / float(var['ADAPTED_HEIGHT'])
 

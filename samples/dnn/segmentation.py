@@ -1,6 +1,6 @@
 import cv2 as cv
 import argparse
-import numpy as np
+import mlx.core as mx
 import sys
 
 from common import *
@@ -60,7 +60,7 @@ if args.classes:
 colors = None
 if args.colors:
     with open(args.colors, 'rt') as f:
-        colors = [np.array(color.split(' '), np.uint8) for color in f.read().rstrip('\n').split('\n')]
+        colors = [mx.array(color.split(' '), mx.uint8) for color in f.read().rstrip('\n').split('\n')]
 
 legend = None
 def showLegend(classes):
@@ -69,7 +69,7 @@ def showLegend(classes):
         blockHeight = 30
         assert(len(classes) == len(colors))
 
-        legend = np.zeros((blockHeight * len(colors), 200, 3), np.uint8)
+        legend = mx.zeros((blockHeight * len(colors), 200, 3), mx.uint8)
         for i in range(len(classes)):
             block = legend[i * blockHeight:(i + 1) * blockHeight]
             block[:,:] = colors[i]
@@ -114,16 +114,16 @@ while cv.waitKey(1) < 0:
     # Draw segmentation
     if not colors:
         # Generate colors
-        colors = [np.array([0, 0, 0], np.uint8)]
+        colors = [mx.array([0, 0, 0], mx.uint8)]
         for i in range(1, numClasses):
-            colors.append((colors[i - 1] + np.random.randint(0, 256, [3], np.uint8)) / 2)
+            colors.append((colors[i - 1] + mx.random.randint(0, 256, [3], mx.uint8)) / 2)
 
-    classIds = np.argmax(score[0], axis=0)
-    segm = np.stack([colors[idx] for idx in classIds.flatten()])
+    classIds = mx.argmax(score[0], axis=0)
+    segm = mx.stack([colors[idx] for idx in classIds.flatten()])
     segm = segm.reshape(height, width, 3)
 
     segm = cv.resize(segm, (frameWidth, frameHeight), interpolation=cv.INTER_NEAREST)
-    frame = (0.1 * frame + 0.9 * segm).astype(np.uint8)
+    frame = (0.1 * frame + 0.9 * segm).astype(mx.uint8)
 
     # Put efficiency information.
     t, _ = net.getPerfProfile()

@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-import numpy as np
+import mlx.core as mx
 import cv2 as cv
 import sys
 
@@ -20,7 +20,7 @@ def help(filename):
 
 class MyData:
     A = 97
-    X = np.pi
+    X = mx.pi
     name = 'mydata1234'
 
     def __repr__(self):
@@ -55,8 +55,8 @@ def main(argv):
 
     # write
     ## [iomati]
-    R = np.eye(3,3)
-    T = np.zeros((3,1))
+    R = mx.eye(3,3)
+    T = mx.zeros((3,1))
     ## [iomati]
     ## [customIOi]
     m = MyData()

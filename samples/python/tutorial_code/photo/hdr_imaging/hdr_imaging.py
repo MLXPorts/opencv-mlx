@@ -1,7 +1,7 @@
 from __future__ import print_function
 from __future__ import division
 import cv2 as cv
-import numpy as np
+import mlx.core as mx
 import argparse
 import os
 
@@ -15,7 +15,7 @@ def loadExposureSeq(path):
         images.append(cv.imread(os.path.join(path, tokens[0])))
         times.append(1 / float(tokens[1]))
 
-    return images, np.asarray(times, dtype=np.float32)
+    return images, mx.asarray(times, dtype=mx.float32)
 
 parser = argparse.ArgumentParser(description='Code for High Dynamic Range Imaging tutorial.')
 parser.add_argument('--input', type=str, help='Path to the directory that contains images and exposure times.')
