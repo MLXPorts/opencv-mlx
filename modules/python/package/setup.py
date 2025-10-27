@@ -44,7 +44,7 @@ def main():
             "cv2": typing_stub_files
         },
         maintainer="OpenCV Team",
-        install_requires="numpy",
+        install_requires="mlx @ git+https://github.com/SolaceHarmony/mlx-precise@main",
         classifiers=[
             "Development Status :: 5 - Production/Stable",
             "Environment :: Console",
