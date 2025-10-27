@@ -6,7 +6,7 @@
 > - **MLX-Native:** All 223 Python files migrated from `numpy` to `mlx.core` (`np.` → `mx.`)
 > - **NumPy-Free:** Complete removal of NumPy dependency
 > - **Python 3.14+ Required:** Built for Python 3.14 free-threading
-> - **Part of MLX Ecosystem:** Uses [mlx-precise](https://github.com/SolaceHarmony/mlx-precise) for tensor operations
+> - **Part of MLX Ecosystem:** Uses [mlx-precise](https://github.com/MLXPorts/mlx-precise) for tensor operations
 > - **Apple Silicon Only:** Optimized for M1/M2/M3/M4 with Metal acceleration
 
 **Requirements:**
@@ -20,7 +20,7 @@
 python --version  # Should show Python 3.14.0 or later
 
 # Install from git (Note: Build from source - see OpenCV docs)
-git clone https://github.com/SolaceHarmony/opencv-mlx
+git clone https://github.com/MLXPorts/opencv-mlx
 cd opencv-mlx
 
 # Will automatically install mlx-precise dependency
