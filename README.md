@@ -1,3 +1,41 @@
+## OpenCV-MLX: NumPy-Free, MLX-Native Computer Vision
+
+> **This is a specialized fork of OpenCV with all NumPy dependencies replaced by MLX.**
+>
+> **Key Changes:**
+> - **MLX-Native:** All 223 Python files migrated from `numpy` to `mlx.core` (`np.` → `mx.`)
+> - **NumPy-Free:** Complete removal of NumPy dependency
+> - **Python 3.14+ Required:** Built for Python 3.14 free-threading
+> - **Part of MLX Ecosystem:** Uses [mlx-precise](https://github.com/SolaceHarmony/mlx-precise) for tensor operations
+> - **Apple Silicon Only:** Optimized for M1/M2/M3/M4 with Metal acceleration
+
+**Requirements:**
+- **Python 3.14 or later** (required for free-threading)
+- **Apple Silicon Mac** (M1/M2/M3/M4)
+- **macOS 11.0+**
+
+**Installation:**
+```bash
+# Requires Python 3.14 free-threading build
+python --version  # Should show Python 3.14.0 or later
+
+# Install from git (Note: Build from source - see OpenCV docs)
+git clone https://github.com/SolaceHarmony/opencv-mlx
+cd opencv-mlx
+
+# Will automatically install mlx-precise dependency
+# See modules/python/package/setup.py for dependency configuration
+```
+
+**Migration Details:**
+- 223 files modified (1818 insertions, 1817 deletions)
+- Pattern: `import numpy as np` → `import mlx.core as mx`
+- All `np.*` array operations replaced with `mx.*` equivalents
+
+**Upstream:** Based on [OpenCV 4.x](https://github.com/opencv/opencv/tree/4.x)
+
+---
+
 ## OpenCV: Open Source Computer Vision Library
 
 
